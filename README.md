@@ -33,8 +33,8 @@ library(gganimate)
 library(ggraph)
 library(igraph)
 library(hrbrthemes)
-library(ggalt)   
-library(ggthemes) 
+library(ggalt)
+library(ggthemes)
 ```
 
 This is the first step for collecting tweets based on location. See the
@@ -202,8 +202,8 @@ and the `retryonratelimit` argument to `TRUE`.
 ``` r
 ## search using multilple queries
 DubNtnStrngthNmbrs <- rtweet::search_tweets2(
-            c("\"#DubNation\"", 
-              "#StrengthInNumbers"), 
+            c("\"#DubNation\"",
+              "#StrengthInNumbers"),
             n = 50000, retryonratelimit = TRUE)
 ```
 
@@ -346,37 +346,37 @@ tibble::as_tibble(base::intersect(x = base::names(DubNtnStrngthNmbrs),
                 y = base::names(rtweet::users_data(DubNtnStrngthNmbrs))))
 ```
 
-``` 
+```
 # A tibble: 20 x 1
-   value                 
-   <chr>                 
- 1 user_id               
- 2 screen_name           
- 3 name                  
- 4 location              
- 5 description           
- 6 url                   
- 7 protected             
- 8 followers_count       
- 9 friends_count         
-10 listed_count          
-11 statuses_count        
-12 favourites_count      
-13 account_created_at    
-14 verified              
-15 profile_url           
-16 profile_expanded_url  
-17 account_lang          
-18 profile_banner_url    
+   value
+   <chr>
+ 1 user_id
+ 2 screen_name
+ 3 name
+ 4 location
+ 5 description
+ 6 url
+ 7 protected
+ 8 followers_count
+ 9 friends_count
+10 listed_count
+11 statuses_count
+12 favourites_count
+13 account_created_at
+14 verified
+15 profile_url
+16 profile_expanded_url
+17 account_lang
+18 profile_banner_url
 19 profile_background_url
-20 profile_image_url     
+20 profile_image_url
 ```
 
 I’ll store the contents in a new data frame called
 `UsersDubNtnStrngthNmbrs`.
 
 ``` r
-# get user data 
+# get user data
 UsersDubNtnStrngthNmbrs <- rtweet::users_data(DubNtnStrngthNmbrs)
 UsersDubNtnStrngthNmbrs %>% glimpse(78)
 ```
@@ -416,34 +416,34 @@ frame.
 ``` r
 tibble::as_tibble(
     intersect(x = base::names(DubNtnStrngthNmbrs),
-          y = base::names(rtweet::tweets_data(DubNtnStrngthNmbrs)))) %>% 
+          y = base::names(rtweet::tweets_data(DubNtnStrngthNmbrs)))) %>%
           utils::head(20)
 ```
 
-``` 
+```
 # A tibble: 20 x 1
-   value               
-   <chr>               
- 1 user_id             
- 2 status_id           
- 3 created_at          
- 4 screen_name         
- 5 text                
- 6 source              
- 7 display_text_width  
- 8 reply_to_status_id  
- 9 reply_to_user_id    
+   value
+   <chr>
+ 1 user_id
+ 2 status_id
+ 3 created_at
+ 4 screen_name
+ 5 text
+ 6 source
+ 7 display_text_width
+ 8 reply_to_status_id
+ 9 reply_to_user_id
 10 reply_to_screen_name
-11 is_quote            
-12 is_retweet          
-13 favorite_count      
-14 retweet_count       
-15 hashtags            
-16 symbols             
-17 urls_url            
-18 urls_t.co           
-19 urls_expanded_url   
-20 media_url           
+11 is_quote
+12 is_retweet
+13 favorite_count
+14 retweet_count
+15 hashtags
+16 symbols
+17 urls_url
+18 urls_t.co
+19 urls_expanded_url
+20 media_url
 ```
 
 ``` r
@@ -457,17 +457,17 @@ review the first 10 of these entries with `dplyr::select()` and
 `utils::head()`.
 
 ``` r
-DubNtnStrngthNmbrs %>% 
-    dplyr::select(text) %>% 
+DubNtnStrngthNmbrs %>%
+    dplyr::select(text) %>%
     utils::head(10)
 ```
 
     # A tibble: 10 x 1
-       text                                                                   
-       <chr>                                                                  
+       text
+       <chr>
      1 RT @warriors: #DubNation, your 2018 Champs 🏆 will arrive back home thi…
      2 RT @GloballyCurry30: Greatest. Of. All. Time. #DubNation #NBAFinals #N…
-     3 RT @GloballyCurry30: #DubNation #WEBACK https://t.co/brNLP7JbRh        
+     3 RT @GloballyCurry30: #DubNation #WEBACK https://t.co/brNLP7JbRh
      4 RT @indepocrlh: Espero q para o ano ao menos a final seja mais disputa…
      5 "RT @gbrandaoc11: Another one!💙💛\n#DubNation #NBAFinals https://t.co/J…
      6 RT @warriors: #DubNation, your 2018 Champs 🏆 will arrive back home thi…
@@ -484,21 +484,21 @@ tweets over time with `rtweet::ts_plot()`. I added the
 `ggplot2::theme(plot.title = ggplot2::element_text())`.
 
 ``` r
-gg_ts_plot <- DubNtnStrngthNmbrs %>% 
+gg_ts_plot <- DubNtnStrngthNmbrs %>%
     rtweet::ts_plot(., by = "15 minutes") +
     ggthemes::theme_gdocs() +
-    ggplot2::theme(plot.title = 
+    ggplot2::theme(plot.title =
                        ggplot2::element_text(face = "bold")) +
     ggplot2::labs(
-            x = NULL, 
+            x = NULL,
             y = NULL,
             title = "#DubNation & #StrengthInNumbers tweets",
-            caption = "\nSource: Counts aggregated using fifteen-minute intervals; 
+            caption = "\nSource: Counts aggregated using fifteen-minute intervals;
                         data collected using Twitter's REST API via rtweet")
 gg_ts_plot
 ```
 
-![](README_files/figure-gfm/gg_ts_plot-1.png)<!-- -->
+![gg_ts_plot](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_ts_plot.png)
 
 ``` r
 ggsave(filename = "Images/gg_ts_plot.png", width = 6.5, height = 4, units = "in")
@@ -519,17 +519,17 @@ This function adds a `lat` and `lng` variable to the
 *I verify this with `names()` and `tail()`*.
 
 ``` r
-# get lattitude and longitude 
+# get lattitude and longitude
 DubNtnStrngthNmbrsLoc <- rtweet::lat_lng(DubNtnStrngthNmbrs)
-DubNtnStrngthNmbrs %>% names() %>% tail(2) 
+DubNtnStrngthNmbrs %>% names() %>% tail(2)
 ```
 
-``` 
-[1] "profile_image_url" "query"            
+```
+[1] "profile_image_url" "query"
 ```
 
 ``` r
-DubNtnStrngthNmbrsLoc %>% names() %>% tail(2) 
+DubNtnStrngthNmbrsLoc %>% names() %>% tail(2)
 ```
 
     [1] "lat" "lng"
@@ -586,25 +586,25 @@ can see why I renamed the `lng` variable to `long` in
 and `color`.
 
 ``` r
-ggWorldMap <- ggplot2::ggplot() + 
-    ggplot2::geom_polygon(data = World, 
-                            aes(x = long, 
-                                y = lat, 
-                                group = group), 
-                                fill = "gold", 
+ggWorldMap <- ggplot2::ggplot() +
+    ggplot2::geom_polygon(data = World,
+                            aes(x = long,
+                                y = lat,
+                                group = group),
+                                fill = "gold",
                                 color = "royalblue",
-                                alpha = 0.6) 
-ggWorldMap + 
-     ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) + 
+                                alpha = 0.6)
+ggWorldMap +
+     ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) +
      ggplot2::labs(title = "Basic World Map (geom_polygon)")
 ```
 
-![](README_files/figure-gfm/ggWorldMap-1.png)<!-- -->
+![ggWorldMap](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/ggWorldMap.png)
 
 ``` r
-ggsave(filename = "Images/ggWorldMap.png", 
-       width = 6.5, 
-       height = 4, 
+ggsave(filename = "Images/ggWorldMap.png",
+       width = 6.5,
+       height = 4,
        units = "in")
 ```
 
@@ -625,26 +625,26 @@ axes)
 ``` r
 gg_Merc_title <- "  Worldwide (Mercator) #DubNation and #StrengthInNumbers tweets"
 gg_Merc_cap <- "tweets collected with rtweet the hashtags #DubNation and #StrengthInNumbers"
-gg_mercator_dubstrngth <- ggWorldMap + 
+gg_mercator_dubstrngth <- ggWorldMap +
     ggplot2::coord_quickmap() +
-        ggplot2::geom_point(data = DubNtnStrngthNmbrsLoc, 
-                        aes(x = long, y = lat), 
+        ggplot2::geom_point(data = DubNtnStrngthNmbrsLoc,
+                        aes(x = long, y = lat),
                         size = 0.7, # reduce size of points
                         color = "firebrick") +
     # add titles/labels
-     ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) + 
-        ggplot2::labs(title = gg_Merc_title, 
+     ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) +
+        ggplot2::labs(title = gg_Merc_title,
         caption = gg_Merc_cap) +
-        ggthemes::theme_map() 
+        ggthemes::theme_map()
 gg_mercator_dubstrngth
 ```
 
-![](README_files/figure-gfm/gg_mercator_dubstrngth-1.png)<!-- -->
+![gg_mercator_dubstrngth](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_mercator_dubstrngth.png)
 
 ``` r
-ggplot2::ggsave(filename = "Images/gg_mercator_dubstrngth.png", 
-                width = 6.5, 
-                height = 4, 
+ggplot2::ggsave(filename = "Images/gg_mercator_dubstrngth.png",
+                width = 6.5,
+                height = 4,
                 units = "in")
 ```
 
@@ -670,39 +670,39 @@ below.
 
 ``` r
 # convert query to factor (you'll see why later)
-DubNtnStrngthNmbrsLoc$query <- factor(DubNtnStrngthNmbrsLoc$query, 
+DubNtnStrngthNmbrsLoc$query <- factor(DubNtnStrngthNmbrsLoc$query,
                           labels = c("#DubNation", "#StrengthInNumbers"))
-# define titles 
+# define titles
 ggDubWT_title <- "Worldwide (Winkel tripel) #DubNation &\n#StrengthInNumbers tweets"
 ggDubWT_cap <- "tweets collected with rtweet the hashtags #DubNation and #StrengthInNumbers  "
 
-#  create world map 
-ggWorld2 <- ggplot2::ggplot() + 
+#  create world map
+ggWorld2 <- ggplot2::ggplot() +
     ggplot2::geom_map(data = World, map = World,
-                    aes(x = long, 
-                        y = lat, 
+                    aes(x = long,
+                        y = lat,
                         map_id = region),
                     size = 0.009,
-                    fill = "gold", 
-                    alpha = 0.4) 
+                    fill = "gold",
+                    alpha = 0.4)
         #  add the twiiter data layer
-ggDubWinkelTrip <- ggWorld2 + 
-    ggplot2::geom_point(data = DubNtnStrngthNmbrsLoc, 
-            aes(x = long, 
-                y = lat),   
+ggDubWinkelTrip <- ggWorld2 +
+    ggplot2::geom_point(data = DubNtnStrngthNmbrsLoc,
+            aes(x = long,
+                y = lat),
                     color = "royalblue",
                     size = 0.4) +
         # add Winkel tripel layer
         ggalt::coord_proj("+proj=wintri") +
             ggplot2::theme(plot.title = ggplot2::element_text(
-                                                face = "bold")) + 
+                                                face = "bold")) +
             ggplot2::labs(
-            title = ggDubWT_title, 
-            caption = ggDubWT_cap) 
+            title = ggDubWT_title,
+            caption = ggDubWT_cap)
 ggDubWinkelTrip
 ```
 
-![](README_files/figure-gfm/ggDubWinkelTrip-1.png)<!-- -->
+![ggDubWinkelTrip](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/ggDubWinkelTrip.png)
 
 ``` r
 ggsave(filename = "Images/ggDubWinkelTrip.png", width = 6.5, height = 4, units = "in")
@@ -713,18 +713,18 @@ customization:
 
   - I’ll start by adjusting the x axis manually with
     `ggplot2::scale_x_continuous()` (this gives a full ‘globe’ on the
-    map),  
+    map),
   - I add the FiveThiryEight theme from
-    `ggthemes::theme_fivethirtyeight()`,  
+    `ggthemes::theme_fivethirtyeight()`,
   - Remove the `x` and `y` axis labels with two `ggplot2::theme()`
-    statements,  
+    statements,
   - Finally, facet these maps by the query type (`#DubNation` or
     `#StrengthInNumbers`)
 
 <!-- end list -->
 
 ``` r
-ggDubWinkelTripFacet <- ggDubWinkelTrip + 
+ggDubWinkelTripFacet <- ggDubWinkelTrip +
     ggplot2::scale_x_continuous(limits = c(-200, 200)) +
      ggthemes::theme_fivethirtyeight() +
     ggplot2::theme(
@@ -735,18 +735,18 @@ ggDubWinkelTripFacet <- ggDubWinkelTrip +
         axis.title.x = element_blank(),
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank()) +
-    ggplot2::labs(title = ggDubWT_title, 
+    ggplot2::labs(title = ggDubWT_title,
         caption = ggDubWT_cap) +
     facet_wrap( ~ query)
 ggDubWinkelTripFacet
 ```
 
-![](README_files/figure-gfm/ggDubWinkelTripFacet-1.png)<!-- -->
+![ggDubWinkelTripFacet](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/ggDubWinkelTripFacet.png)
 
 ``` r
-ggsave(filename = "Images/ggDubWinkelTripFacet.png", 
-       width = 6.5, 
-       height = 4, 
+ggsave(filename = "Images/ggDubWinkelTripFacet.png",
+       width = 6.5,
+       height = 4,
        units = "in")
 ```
 
@@ -778,58 +778,57 @@ I can start by looking at the number of followers for each account
 ``` r
 DubNtnStrngthNmbrsLoc %>%
     # identify observations with complete location information
-        dplyr::filter(!is.na(long) | 
+        dplyr::filter(!is.na(long) |
                   !is.na(lat)) %>%
     # get the sorted count
-    dplyr::select(followers_count, screen_name) %>% 
+    dplyr::select(followers_count, screen_name) %>%
     # arrange these descending
     dplyr::arrange(desc(followers_count)) %>% head(10)
 ```
 
-``` 
+```
 # A tibble: 10 x 2
-   followers_count screen_name   
-             <int> <chr>         
+   followers_count screen_name
+             <int> <chr>
  1          424668 realfredrosser
  2          424666 realfredrosser
- 3           30297 jgibbard      
- 4           30297 jgibbard      
- 5           18962 Lakeshore23   
- 6           16800 coreydu       
- 7           12333 billsowah1    
- 8           10404 tigerbeat     
- 9            8260 jeanquan      
-10            8260 jeanquan      
+ 3           30297 jgibbard
+ 4           30297 jgibbard
+ 5           18962 Lakeshore23
+ 6           16800 coreydu
+ 7           12333 billsowah1
+ 8           10404 tigerbeat
+ 9            8260 jeanquan
+10            8260 jeanquan
 ```
 
 This looks like there are a few `screen_name`s with \> 10000 followers.
 I can get a quick view of the distribution of this variable with
 `qplot()`
 
-``` r
+```r
 gg_freqploy_title <- "Frequency of followers_count for #DubNation &\n#StrengthInNumbers tweets"
-DubNtnStrngthNmbrsLoc %>% 
+DubNtnStrngthNmbrsLoc %>%
         # identify observations with complete location information
-        dplyr::filter(!is.na(long) | 
+        dplyr::filter(!is.na(long) |
                   !is.na(lat)) %>%
-        ggplot2::qplot(x = followers_count, 
-                       data = ., 
+        ggplot2::qplot(x = followers_count,
+                       data = .,
                        geom = "freqpoly") +
             ggplot2::theme(plot.title = ggplot2::element_text(
-                                                face = "bold", size = 14)) + 
+                                                face = "bold", size = 14)) +
             ggplot2::labs(
-            title = gg_freqploy_title, 
-            caption = ggDubWT_cap) 
+            title = gg_freqploy_title,
+            caption = ggDubWT_cap)
 ```
 
-    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](README_files/figure-gfm/check_distribution_for_outliers-1.png)<!-- -->
+![gg_freqpolyv1](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_freqpolyv1.1.png)
 
 ``` r
-ggsave(filename = "Images/gg_freqpolyv1.2.png", 
-       width = 6.5, 
-       height = 4, 
+ggsave(filename = "Images/gg_freqpolyv1.2.png",
+       width = 6.5,
+       height = 4,
        units = "in")
 ```
 
@@ -840,33 +839,29 @@ distribution. I want to see what the distribution looks like without
 these extremely high counts of followers.
 
 ``` r
-DubNtnStrngthNmbrsLoc %>% 
+DubNtnStrngthNmbrsLoc %>%
     # remove observations without location information
-    dplyr::filter(!is.na(long) | 
-                  !is.na(lat)) %>% 
+    dplyr::filter(!is.na(long) |
+                  !is.na(lat)) %>%
     # arrange data
-    dplyr::arrange(desc(followers_count)) %>% 
+    dplyr::arrange(desc(followers_count)) %>%
     # remove followers with more than 10,000 followers
-    dplyr::filter(followers_count < 10000) %>% 
-        ggplot2::qplot(followers_count, 
-                       data = ., 
+    dplyr::filter(followers_count < 10000) %>%
+        ggplot2::qplot(followers_count,
+                       data = .,
                        geom = "freqpoly") +
             ggplot2::theme(plot.title = ggplot2::element_text(
-                                                face = "bold", size = 12)) + 
+                                                face = "bold", size = 12)) +
             ggplot2::labs(
-            title = gg_freqploy_title, 
-            caption = ggDubWT_cap) 
+            title = gg_freqploy_title,
+            caption = ggDubWT_cap)
 ```
 
-    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-
-![](README_files/figure-gfm/remove_outliers-1.png)<!-- -->
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_freqpolyv1.2.png)<!-- -->
 
 ``` r
 ggsave(filename = "Images/gg_freqpolyv1.2.png", width = 6.5, height = 4, units = "in")
 ```
-
-    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
 This still looks skewed, but now we can see more of a distribution of
 followers. The majority of the observations fall under 2500 followers,
@@ -874,15 +869,15 @@ with a few reaching above 7500. I will remove the observations with more
 than 10,000 followers.
 
 ``` r
-DubAnimateData <- DubNtnStrngthNmbrsLoc %>% 
+DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
     # remove observations without location information
-    dplyr::filter(!is.na(long) | 
-                  !is.na(lat)) %>% 
-    # arrange data descending 
-    dplyr::arrange(desc(followers_count)) %>% 
+    dplyr::filter(!is.na(long) |
+                  !is.na(lat)) %>%
+    # arrange data descending
+    dplyr::arrange(desc(followers_count)) %>%
     # remove the follower_count that are above 10,000
-    dplyr::filter(followers_count < 10000) %>% 
-    # select only the variables we will be visualizing 
+    dplyr::filter(followers_count < 10000) %>%
+    # select only the variables we will be visualizing
     dplyr::select(user_id,
                   status_id,
                   screen_name,
@@ -923,16 +918,16 @@ I also remove the `x` and `y` axis labels, and add the
 
 ``` r
 ggWorld2 +
-  geom_point(aes(x = long, 
-                 y = lat, 
+  geom_point(aes(x = long,
+                 y = lat,
                  size = followers_count),
-             data = DubAnimateData, 
+             data = DubAnimateData,
              color = "royalblue", alpha = .2) +
-  ggplot2::scale_size_continuous(range = c(1, 6), 
-                                breaks = c(500, 1000, 2000, 
+  ggplot2::scale_size_continuous(range = c(1, 6),
+                                breaks = c(500, 1000, 2000,
                                            4000, 6000, 8000)) +
-  labs(size = "Followers") + 
-    ggalt::coord_proj("+proj=wintri") + 
+  labs(size = "Followers") +
+    ggalt::coord_proj("+proj=wintri") +
     ggthemes::theme_hc() +
     ggplot2::theme(
         axis.title.y = element_blank(),
@@ -941,14 +936,14 @@ ggWorld2 +
     ggplot2::theme(
         axis.title.x = element_blank(),
         axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) + 
+        axis.ticks.x = element_blank()) +
     ggplot2::theme(plot.title = ggplot2::element_text(
-                                face = "bold", size = 12)) + 
+                                face = "bold", size = 12)) +
     ggplot2::labs(title = "#DubNation & #StrengthInNumbers",
                   subtitle = "tweets and followers")
 ```
 
-![](README_files/figure-gfm/gg_themehc_v1.0-1.png)<!-- -->
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_themehc_v1.0.png)<!-- -->
 
 ``` r
 ggsave(filename = "Images/gg_themehc_v1.0.png", width = 6.5, height = 4, units = "in")
@@ -968,8 +963,8 @@ library(lubridate)
 # create data frame foe the beginning of the animation
 EmptyAnimateDataBegin <- tibble(
         created_at = as_datetime("2018-06-09 07:43:46 UTC"),
-        followers_count = 0, 
-        long = 0, 
+        followers_count = 0,
+        long = 0,
         lat = 0)
 EmptyAnimateDataBegin
 ```
@@ -984,9 +979,9 @@ EmptyAnimateDataBegin
 EmptyAnimateDataEnd <- tibble(
   created_at = seq(as_datetime("2018-06-10 03:00:00 UTC"),
                    as_datetime("2018-06-10 04:00:00 UTC"),
-                   by = "min"), 
-                followers = 0, 
-                long = 0, 
+                   by = "min"),
+                followers = 0,
+                long = 0,
                 lat = 0)
 EmptyAnimateDataEnd
 ```
@@ -1015,34 +1010,34 @@ been plotted.
 
 ``` r
 DubMap <- ggWorld2 +
-  geom_point(aes(x = long, 
-                 y = lat, 
+  geom_point(aes(x = long,
+                 y = lat,
                  size = followers_count,
                  frame = created_at,
                  cumulative = TRUE),
-             data = DubAnimateData, 
-             color = "royalblue", 
+             data = DubAnimateData,
+             color = "royalblue",
              alpha = .2) +
     # transparent frame 1
-  geom_point(aes(x = long, 
-                y = lat, 
-                size = followers, 
+  geom_point(aes(x = long,
+                y = lat,
+                size = followers,
                 frame = created_at,
                 cumulative = TRUE),
-                        data = ghost_points_ini, 
+                        data = ghost_points_ini,
                         alpha = 0) +
     # transparent frame 2
-  geom_point(aes(x = long, 
-                y = lat, 
-                size = followers, 
+  geom_point(aes(x = long,
+                y = lat,
+                size = followers,
                 frame = created_at,
                 cumulative = TRUE),
-                        data = ghost_points_fin, 
+                        data = ghost_points_fin,
                         alpha = 0) +
-  scale_size_continuous(range = c(1, 6), 
+  scale_size_continuous(range = c(1, 6),
                         breaks = c(500, 1000, 2000, 4000, 6000, 8000)) +
-  labs(size = 'Followers') + 
-    ggalt::coord_proj("+proj=wintri") + 
+  labs(size = 'Followers') +
+    ggalt::coord_proj("+proj=wintri") +
     ggthemes::theme_hc() +
     ggplot2::theme(
         axis.title.y = element_blank(),
@@ -1051,12 +1046,14 @@ DubMap <- ggWorld2 +
     ggplot2::theme(
         axis.title.x = element_blank(),
         axis.text.x = element_blank(),
-        axis.ticks.x = element_blank()) + 
+        axis.ticks.x = element_blank()) +
     ggplot2::labs(title = "#DubNation & #StrengthInNumbers",
                   subtitle = "tweets and followers")
 library(gganimate)
 gganimate(DubMap, interval = .2, "DubMap.gif")
 ```
+
+![DubMap](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/DubMap.gif)
 
 Now I have an animation that displays the tweets as they appeared in the
 two days following the NBA finals.
@@ -1086,23 +1083,13 @@ rtweet::write_as_csv(x = UsersDubNtnStrngthNmbrs,
                  file_name = "Data/Processed/UsersDubNtnStrngthNmbrs.csv")
 ```
 
-Now I have an animation that displays the tweets as they appeared in the
-two days following the NBA finals.
+
 
 To learn more check out these awesome resources:
 
 1.  [Computing for the Social Sciences](https://goo.gl/m7wA6r)
 2.  [Making Maps with R](https://goo.gl/h4EszF)
 3.  [socviz - chapter 7 - Draw maps](https://goo.gl/ibYJuJ)
-4.  [gganimate package](https://github.com/dgrtwo/gganimate)  
-5.  [twitter api object
-    definitions](https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/intro-to-tweet-json)
-
-To learn more check out these awesome resources:
-
-1.  [Computing for the Social Sciences](https://goo.gl/m7wA6r)
-2.  [Making Maps with R](https://goo.gl/h4EszF)
-3.  [socviz - chapter 7 - Draw maps](https://goo.gl/ibYJuJ)
-4.  [gganimate package](https://github.com/dgrtwo/gganimate)  
+4.  [gganimate package](https://github.com/dgrtwo/gganimate)
 5.  [twitter api object
     definitions](https://developer.twitter.com/en/docs/tweets/data-dictionary/overview/intro-to-tweet-json)
