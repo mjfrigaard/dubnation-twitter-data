@@ -809,7 +809,7 @@ ggplot2::ggsave(filename = "Images/2.5-gg_freqpolyv1.1.png", width = 6.5,height 
 ```
 
 
-This long tail tells me that these outliers are skewing the distribution. I want to see what the distribution looks like without these extremely high counts of retweets
+This long tail tells me that these outliers are skewing the distribution. I want to see what the distribution looks like without these extremely high counts of followers.
 
 ``` r
 DubNtnStrngthNmbrsLoc %>%
@@ -840,7 +840,7 @@ ggplot2::ggsave(filename = "Images/2.5-gg_freqpolyv1.2.png", width = 6.5,height 
 
     `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-This still looks skewed, but now we can see more of a distribution of followers. The majority of the observations fall under 10 followers, with few reaching above 20, so I will remove the observations with more than 100 followers.
+This still looks skewed, but now we can see more of a distribution of followers. The majority of the observations fall under 10000 followers, with few reaching above 20000, so I will remove the observations with more than 100000 followers.
 
 ``` r
 DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
