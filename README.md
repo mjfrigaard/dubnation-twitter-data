@@ -865,17 +865,17 @@ DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
 DubAnimateData %>%
   dplyr::select(followers_count) %>%
   skimr::skim(followers_count)
-                  ```
 
-      Skim summary statistics
-       n obs: 595
-       n variables: 1
 
-      ── Variable type:integer ────────────────────────────────────────────────────────────
-              variable missing complete   n    mean      sd p0 p25 p50  p75
-       followers_count       0      595 595 1489.78 3247.01  3 160 416 1308
-        p100     hist
-       24554 ▇▁▁▁▁▁▁▁
+  Skim summary statistics
+   n obs: 595
+   n variables: 1
+
+  ── Variable type:integer ────────────────────────────────────────────────────────────
+          variable missing complete   n    mean      sd p0 p25 p50  p75  p100   hist
+   followers_count       0      595 595 1489.78 3247.01  3 160 416 1308 24554   ▇▁▁▁▁▁▁▁
+
+```
 
 I added a `skimr::skim()` from the [skimr](https://cran.r-project.org/web/packages/skimr/index.html) package because it provides summary statistics and a tiny histogram. Check out how to use this package on their awesome [vignette](https://cran.r-project.org/web/packages/skimr/vignettes/Using_skimr.html) and [website](https://github.com/ropenscilabs/skimr)
 
