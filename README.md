@@ -879,7 +879,7 @@ DubAnimateData %>%
 
 I added a `skimr::skim()` from the [skimr](https://cran.r-project.org/web/packages/skimr/index.html) package because it provides summary statistics and a tiny histogram. Check out how to use this package on their awesome [vignette](https://cran.r-project.org/web/packages/skimr/vignettes/Using_skimr.html) and [website](https://github.com/ropenscilabs/skimr)
 
-Great\! Now I will create another static Winkel tripel map before animating it get an idea for what it will look like. I start with the `ggWorld2` base from above, then layer in the twitter data, this time specifying `size = followers_count` and `ggplot2::scale_size_continuous()`. The `range` is the number of different points, and the `breaks` are the cut-offs for each size.
+Great\! Now I will create another static Winkel tripel map before animating it get an idea for what it will look like. I start with the `ggWorld2` base from above, then layer in the twitter data, this time specifying `size = followers_count` and `ggplot2::scale_size_continuous()`. The `range` is the number of different points, and the `breaks` are the cut-offs for each size. I use the percentiles from the `skimr` output above. 
 
 I also remove the `x` and `y` axis labels, and add the `ggthemes::theme_hc()` for a crisp looking finish.
 
