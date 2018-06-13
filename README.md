@@ -1,8 +1,6 @@
 README- \#DubNation Parade - streaming and plotting tweets in R
 ================
 
-    ## [1] "2.5-dubnation_parade_tweets.Rmd"
-
 # Motivation
 
 This post will walk you through 1) collecting data from a Twitter API using the `rtweet` package, 2) creating a map with the tweets using the `ggmap`, `maps`, and `mapdata`, and 3) graphing the tweets with `ggplot2` and `gganimate`.
@@ -864,21 +862,22 @@ DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
                   long,
                   hashtags,
                   lat)
-DubAnimateData %>% glimpse(78)
-```
+DubAnimateData %>%
+  dplyr::select(followers_count) %>%
+  skimr::skim(followers_count)
+                  ```
 
-    Observations: 605
-    Variables: 10
-    $ user_id         <chr> "19923144", "19923144", "63814087", "821198788559...
-    $ status_id       <chr> "1006550485501792258", "1006550485501792258", "10...
-    $ screen_name     <chr> "NBA", "NBA", "liliankim7", "stephenzinho", "Lets...
-    $ followers_count <int> 27854760, 27854705, 4372, 1388, 143510, 143512, 4...
-    $ retweet_count   <int> 999, 981, 51, 35, 30, 30, 17, 17, 11, 11, 10, 10,...
-    $ created_at      <dttm> 2018-06-12 14:55:11, 2018-06-12 14:55:11, 2018-0...
-    $ text            <chr> "Happy Parade Day! #DubNation https://t.co/3qpgbR...
-    $ long            <dbl> -122.23, -122.23, -122.23, -43.30, -122.44, -122....
-    $ hashtags        <list> ["DubNation", "DubNation", <"WarriorsParade", "D...
-    $ lat             <dbl> 37.79, 37.79, 37.79, -22.64, 37.62, 37.62, 34.09,...
+      Skim summary statistics
+       n obs: 595
+       n variables: 1
+
+      ── Variable type:integer ────────────────────────────────────────────────────────────
+              variable missing complete   n    mean      sd p0 p25 p50  p75
+       followers_count       0      595 595 1489.78 3247.01  3 160 416 1308
+        p100     hist
+       24554 ▇▁▁▁▁▁▁▁
+
+I added a `skimr::skim()` from the [skimr](https://cran.r-project.org/web/packages/skimr/index.html) package because it provides summary statistics and a tiny histogram. Check out how to use this package on their awesome [vignette](https://cran.r-project.org/web/packages/skimr/vignettes/Using_skimr.html) and [website](https://github.com/ropenscilabs/skimr)
 
 Great\! Now I will create another static Winkel tripel map before animating it get an idea for what it will look like. I start with the `ggWorld2` base from above, then layer in the twitter data, this time specifying `size = followers_count` and `ggplot2::scale_size_continuous()`. The `range` is the number of different points, and the `breaks` are the cut-offs for each size.
 
