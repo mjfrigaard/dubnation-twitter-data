@@ -890,9 +890,9 @@ ggWorld2 +
                  size = followers_count),
              data = DubAnimateData,
              color = "magenta2", alpha = 0.4) +
-  ggplot2::scale_size_continuous(range = c(1, 6),
-                                breaks = c(1, 10, 20,
-                                           30, 40, 50)) +
+  scale_size_continuous(range = c(1, 5), 
+                        breaks = c(3, 160, 416, 1308, 24554),
+                        labels = c("p0", "p25", "p50", "p75", "p100")) +
   labs(size = "Retweets") +
     ggalt::coord_proj("+proj=wintri") +
     ggthemes::theme_hc() +
@@ -994,9 +994,9 @@ DubMap <- ggWorld2 +
                 cumulative = TRUE),
                         data = EmptyAnimateDataEnd,
                         alpha = 0) +
-  ggplot2::scale_size_continuous(range = c(1, 6),
-                                breaks = c(1, 10, 20,
-                                           30, 40, 50)) +
+  scale_size_continuous(range = c(1, 5), 
+                        breaks = c(3, 160, 416, 1308, 24554),
+                        labels = c("p0", "p25", "p50", "p75", "p100")) +
   labs(size = 'Retweets') +
     ggalt::coord_proj("+proj=wintri") +
     ggthemes::theme_hc() +
