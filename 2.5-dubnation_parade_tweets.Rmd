@@ -70,9 +70,9 @@ paste0(mydate, "%", mytime)
 
 ```{r load_data, eval=TRUE, echo=FALSE}
 # fs::dir_ls("Data/tweet_searches")
-DubNtnStrngthNmbrs <- read_rds("Data/tweet_searches/2.5/DubNtnStrngthNmbrs2018-06-12%13.00.19.rds")
-WarriorsStream <- read_rds("Data/tweet_searches/2.5/WarriorsStream2018-06-12%13.34.23.rds")
-WarriorsParadeStream <- read_rds("Data/tweet_searches/2.5/WarriorsParadeStream2018-06-12%13.34.23.rds")
+DubNtnStrngthNmbrs <- read_rds("Data/tweet_searches/DubNtnStrngthNmbrs2018-06-12%13.00.19.rds")
+WarriorsStream <- read_rds("Data/tweet_searches/WarriorsStream2018-06-12%13.34.23.rds")
+WarriorsParadeStream <- read_rds("Data/tweet_searches/WarriorsParadeStream2018-06-12%13.34.23.rds")
 # ls()
 ```
 
@@ -108,12 +108,10 @@ This is the first step for collecting tweets based on location. See the vignette
 
 ![rtweet_setup](./Images/rtweet_setup.png)
 
-## collect a stream of tweets 
+
+## Collect tweets with a certain keyword or phrase
 
 We will start by collecting data on a certain hashtag occurrence. Today is June 12th, 2018, and they Golden State Warriors are celebrating their third NBA title '#DubNation celebration'. I'll be searching for the hashtags `#DubNation` and `#StrengthInNumbers`. 
-
-To collect a stream of tweets, we can use the 
-
 
 The function for collecting tweets is `rtweet::search_tweets()`, and it takes a query `q` (our term). Learn more about this function by typing:
 
@@ -529,7 +527,7 @@ DubNtnStrngthNmbrsLoc %>%
 ggplot2::ggsave(filename = "Images/2.5-gg_freqpolyv1.1.png", width = 6.5,height = 4, units = "in")
 ```
 
-This long tail tells me that these outliers are skewing the distribution. I want to see what the distribution looks like without these extremely high counts of retweets 
+This long tail tells me that these outliers are skewing the distribution. I want to see what the distribution looks like without these extremely high counts of followers.
 
 ```{r gg_freqpolyv1.2.png, eval=TRUE, message=TRUE, warning=TRUE, fig.height=4, fig.width=6.5}
 DubNtnStrngthNmbrsLoc %>% 
@@ -551,7 +549,7 @@ DubNtnStrngthNmbrsLoc %>%
 ggplot2::ggsave(filename = "Images/2.5-gg_freqpolyv1.2.png", width = 6.5,height = 4, units = "in")
 ```
 
-This still looks skewed, but now we can see more of a distribution of followers. The majority of the observations fall under 10 followers, with few reaching above 20, so I will remove the observations with more than 100 followers.
+This still looks skewed, but now we can see more of a distribution of followers. The majority of the observations fall under 10000 followers, with few reaching above 20000, so I will remove the observations with more than 100000 followers.
 
 ```{r DubAnimateData, eval=TRUE}
 DubAnimateData <- DubNtnStrngthNmbrsLoc %>% 
@@ -559,24 +557,28 @@ DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
     dplyr::filter(!is.na(long) | 
                   !is.na(lat)) %>% 
     # arrange data descending 
-    dplyr::arrange(desc(retweet_count)) %>% 
+    dplyr::arrange(desc(followers_count)) %>% 
     # remove the follower_count that are above 100000
-    dplyr::filter(retweet_count < 100000) %>% 
+    dplyr::filter(followers_count < 100000) %>% 
     # select only the variables we will be visualizing 
     dplyr::select(user_id,
                   status_id,
                   screen_name,
                   followers_count,
-                  retweet_count,
                   created_at,
                   text,
                   long,
                   hashtags,
                   lat)
-DubAnimateData %>% glimpse(78)
+DubAnimateData %>% 
+    dplyr::select(followers_count) %>% 
+    skimr::skim(followers_count)
 ```
 
-Great! Now I will create another static Winkel tripel map before animating it get an idea for what it will look like. I start with the `ggWorld2` base from above, then layer in the twitter data, this time specifying `size = followers_count` and `ggplot2::scale_size_continuous()`. The `range` is the number of different points, and the `breaks` are the cut-offs for each size.
+I added a `skimr::skim()` from the [skimr](https://cran.r-project.org/web/packages/skimr/index.html) package because it provides summary statistics and a tiny histogram. Check out how to use this package on their awesome [vignette](https://cran.r-project.org/web/packages/skimr/vignettes/Using_skimr.html) and [website](https://github.com/ropenscilabs/skimr) 
+
+
+Great! Now I will create another static Winkel tripel map before animating it get an idea for what it will look like. I start with the `ggWorld2` base from above, then layer in the twitter data, this time specifying `size = followers_count` and `ggplot2::scale_size_continuous()`. The `range` is the number of different points, and the `breaks` are the cut-offs for each size. I use the percentiles from the `skimr` output above. 
 
 
 I also remove the `x` and `y` axis labels, and add the `ggthemes::theme_hc()` for a crisp looking finish. 
@@ -587,11 +589,11 @@ ggWorld2 +
                  y = lat, 
                  size = followers_count),
              data = DubAnimateData, 
-             color = "magenta2", alpha = 0.4) +
-  ggplot2::scale_size_continuous(range = c(1, 6), 
-                                breaks = c(1, 10, 20, 
-                                           30, 40, 50)) +
-  labs(size = "Retweets") + 
+             color = "magenta2", alpha = 0.3) +
+  scale_size_continuous(range = c(1, 5), 
+                        breaks = c(3, 160, 416, 1308, 24554),
+                        labels = c("p0", "p25", "p50", "p75", "p100")) +
+  labs(size = "Followers") + 
     ggalt::coord_proj("+proj=wintri") + 
     ggthemes::theme_hc() +
     ggplot2::theme(
@@ -664,9 +666,9 @@ DubMap <- ggWorld2 +
                 cumulative = TRUE),
                         data = EmptyAnimateDataEnd, 
                         alpha = 0) +
-  ggplot2::scale_size_continuous(range = c(1, 6), 
-                                breaks = c(1, 10, 20, 
-                                           30, 40, 50)) +
+  scale_size_continuous(range = c(1, 5), 
+                        breaks = c(3, 160, 416, 1308, 24554),
+                        labels = c("p0", "p25", "p50", "p75", "p100")) +
   labs(size = 'Retweets') + 
     ggalt::coord_proj("+proj=wintri") + 
     ggthemes::theme_hc() +
