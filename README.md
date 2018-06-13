@@ -1,26 +1,17 @@
-Collecting and mapping tweets in R
+README- \#DubNation Parade - streaming and plotting tweets in R
 ================
 
-    ## [1] "2.4-collecting_tweets.Rmd"
-
-<!-- Load data -->
-
-    Data/tweet_searches/2.3-DubNtnStrngthNmbrs-2018-06-09-21-39-28.rds
-    Data/tweet_searches/2.3-DubTweetsGame3-2018-06-06.rds
-    Data/tweet_searches/2.3-TweetsDubNtnStrngthNmbrs-2018-06-09-22-04-30.rds
-    Data/tweet_searches/2.3-UsersDubNtnStrngthNmbrs-2018-06-09-21-46-45.rds
+    ## [1] "2.5-dubnation_parade_tweets.Rmd"
 
 # Motivation
 
-This post will walk you through 1) collecting data from a Twitter API
-using the `rtweet` package, 2) creating a map with the tweets using the
-`ggmap`, `maps`, and `mapdata`, and 3) graphing the tweets with You can
-find excellent documentation on the package
-[website](http://rtweet.info/), I am just going to go into more detail.
+This post will walk you through 1) collecting data from a Twitter API using the `rtweet` package, 2) creating a map with the tweets using the `ggmap`, `maps`, and `mapdata`, and 3) graphing the tweets with `ggplot2` and `gganimate`.
 
 ## Set up the twitter app (with `rtweet`)
 
-Install/load the package
+You can find excellent documentation on the package [website](http://rtweet.info/), I am just going to go into more detail.
+
+Install/load the package.
 
 ``` r
 library(tidyverse)
@@ -37,215 +28,181 @@ library(ggalt)
 library(ggthemes)
 ```
 
-This is the first step for collecting tweets based on location. See the
-vignette [here](http://rtweet.info/articles/auth.html). I’ve outlined
-this process in the link below.
+This is the first step for collecting tweets based on location. See the vignette [here](http://rtweet.info/articles/auth.html). I’ve outlined this process in the link below.
 
-![rtweet\_setup](./Images/rtweet_setup.png)
+![rtweet\_setup](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/rtweet_setup.png)
 
-## Searching for word occurances in tweets
+## collect a stream of tweets
 
-We will start by collecting data on a certain hashtag occurrence. When I
-am writing this, it is game three of the NBA finals, so I will search
-for the hastag `#DubNation`. The function for collecting tweets is
-`rtweet::search_tweets()`, and it takes a query `q` (our term).
+We will start by collecting data on a certain hashtag occurrence. Today is June 12th, 2018, and they Golden State Warriors are celebrating their third NBA title ‘\#DubNation celebration’. I’ll be searching for the hashtags `#DubNation` and `#StrengthInNumbers`.
 
-Learn more about this function by typing:
+The function for collecting tweets is `rtweet::search_tweets()`, and it takes a query `q` (our term). Learn more about this function by typing:
 
 ``` r
 # ?search_tweets
 ```
 
-We will use all the default settings in this inital search.
+We will use all the default settings in this inital search. After the `rtweet::search_tweets()` function has run, I will take a look at this data frame with `dplyr::glimpse()`
 
 ``` r
 # tweets containing #DubNation
-DubTweetsGame3 <- search_tweets("#DubNation")
+DubTweets <- search_tweets("#DubNation")
 ```
-
-After the `rtweet::search_tweets()` function has run, I will take a look
-at this data frame with `dplyr::glimpse()`
 
 ``` r
-DubTweetsGame3 %>% dplyr::glimpse(78)
+DubTweets %>% glimpse(78)
 ```
 
-    Observations: 15,004
+    Observations: 100
     Variables: 87
-    $ user_id                 <chr> "1000036251272187904", "10002061971721216...
-    $ status_id               <chr> "1004574929558257665", "10045813096442019...
-    $ created_at              <dttm> 2018-06-07 04:05:01, 2018-06-07 04:30:23...
-    $ screen_name             <chr> "hsn_sports", "MahmoudZaytoon8", "Wholelo...
-    $ text                    <chr> "\U0001f3c0 Golden State Warriors, Kevin ...
-    $ source                  <chr> "Twitter for Android", "Twitter for Andro...
-    $ display_text_width      <dbl> 168, 140, 139, 143, 35, 72, 101, 45, 98, ...
+    $ user_id                 <chr> "1003972298", "1005326384154185728", "100...
+    $ status_id               <chr> "1007000921245716482", "10070033967196938...
+    $ created_at              <dttm> 2018-06-13 20:45:03, 2018-06-13 20:54:53...
+    $ screen_name             <chr> "iam_boa15", "AkhonaGladile1", "J0yuyDddm...
+    $ text                    <chr> "RT @warriors: Back-to-back Championships...
+    $ source                  <chr> "Twitter for iPhone", "Twitter for Androi...
+    $ display_text_width      <dbl> 140, 140, 109, 139, 100, 91, 72, 140, 140...
     $ reply_to_status_id      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ reply_to_user_id        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ reply_to_screen_name    <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ is_quote                <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
-    $ is_retweet              <lgl> FALSE, TRUE, TRUE, TRUE, FALSE, TRUE, TRU...
-    $ favorite_count          <int> 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,...
-    $ retweet_count           <int> 0, 1210, 1816, 1393, 0, 8963, 508, 1, 1, ...
-    $ hashtags                <list> [<"DubNation", "NBAFinals">, <"NBAFinals...
+    $ is_quote                <lgl> FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, ...
+    $ is_retweet              <lgl> TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, FALS...
+    $ favorite_count          <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+    $ retweet_count           <int> 362, 27, 92, 103, 0, 93, 0, 362, 362, 86,...
+    $ hashtags                <list> [<"NBAFinals", "DubNation">, <"postmalon...
     $ symbols                 <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ urls_url                <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ urls_t.co               <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ urls_expanded_url       <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ media_url               <list> ["http://pbs.twimg.com/tweet_video_thumb...
-    $ media_t.co              <list> ["https://t.co/08UGymu2xy", NA, NA, NA, ...
-    $ media_expanded_url      <list> ["https://twitter.com/hsn_sports/status/...
-    $ media_type              <list> ["photo", NA, NA, NA, "photo", "photo", ...
-    $ ext_media_url           <list> ["http://pbs.twimg.com/tweet_video_thumb...
-    $ ext_media_t.co          <list> ["https://t.co/08UGymu2xy", NA, NA, NA, ...
-    $ ext_media_expanded_url  <list> ["https://twitter.com/hsn_sports/status/...
+    $ urls_url                <list> [NA, NA, NA, NA, "twitter.com/warriors/s...
+    $ urls_t.co               <list> [NA, NA, NA, NA, "https://t.co/SBRSFZSSK...
+    $ urls_expanded_url       <list> [NA, NA, NA, NA, "https://twitter.com/wa...
+    $ media_url               <list> [NA, NA, "http://pbs.twimg.com/ext_tw_vi...
+    $ media_t.co              <list> [NA, NA, "https://t.co/gKdEUjzEu5", NA, ...
+    $ media_expanded_url      <list> [NA, NA, "https://twitter.com/DleeWill/s...
+    $ media_type              <list> [NA, NA, "photo", NA, NA, "photo", NA, N...
+    $ ext_media_url           <list> [NA, NA, "http://pbs.twimg.com/ext_tw_vi...
+    $ ext_media_t.co          <list> [NA, NA, "https://t.co/gKdEUjzEu5", NA, ...
+    $ ext_media_expanded_url  <list> [NA, NA, "https://twitter.com/DleeWill/s...
     $ ext_media_type          <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ mentions_user_id        <list> [NA, "19923144", <"19923144", "26270913"...
-    $ mentions_screen_name    <list> [NA, "NBA", <"NBA", "warriors">, <"NBA",...
-    $ lang                    <chr> "tr", "en", "en", "en", "und", "und", "en...
-    $ quoted_status_id        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_text             <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_created_at       <dttm> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+    $ mentions_user_id        <list> ["26270913", "1000834131901730817", "261...
+    $ mentions_screen_name    <list> ["warriors", "culture_strange", "DleeWil...
+    $ lang                    <chr> "en", "en", "en", "en", "en", "en", "en",...
+    $ quoted_status_id        <chr> NA, NA, NA, NA, "1006979740115324929", NA...
+    $ quoted_text             <chr> NA, NA, NA, NA, "Back-to-back Championshi...
+    $ quoted_created_at       <dttm> NA, NA, NA, NA, 2018-06-13 19:20:53, NA,...
     $ quoted_source           <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_favorite_count   <int> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_retweet_count    <int> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_user_id          <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_screen_name      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_name             <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_followers_count  <int> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_friends_count    <int> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_statuses_count   <int> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_location         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_description      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ quoted_verified         <lgl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ retweet_status_id       <chr> NA, "1004445319499845632", "1004567827133...
-    $ retweet_text            <chr> NA, "Get pumped for Game 3... with Steph ...
-    $ retweet_created_at      <dttm> NA, 2018-06-06 19:30:00, 2018-06-07 03:3...
+    $ quoted_favorite_count   <int> NA, NA, NA, NA, 1962, NA, NA, NA, NA, NA,...
+    $ quoted_retweet_count    <int> NA, NA, NA, NA, 362, NA, NA, NA, NA, NA, ...
+    $ quoted_user_id          <chr> NA, NA, NA, NA, "26270913", NA, NA, NA, N...
+    $ quoted_screen_name      <chr> NA, NA, NA, NA, "warriors", NA, NA, NA, N...
+    $ quoted_name             <chr> NA, NA, NA, NA, "Golden State Warriors", ...
+    $ quoted_followers_count  <int> NA, NA, NA, NA, 5873378, NA, NA, NA, NA, ...
+    $ quoted_friends_count    <int> NA, NA, NA, NA, 986, NA, NA, NA, NA, NA, ...
+    $ quoted_statuses_count   <int> NA, NA, NA, NA, 76517, NA, NA, NA, NA, NA...
+    $ quoted_location         <chr> NA, NA, NA, NA, "Oakland, CA", NA, NA, NA...
+    $ quoted_description      <chr> NA, NA, NA, NA, "\U0001f3c6\U0001f3c6\U00...
+    $ quoted_verified         <lgl> NA, NA, NA, NA, TRUE, NA, NA, NA, NA, NA,...
+    $ retweet_status_id       <chr> "1006979740115324929", "10055750809261547...
+    $ retweet_text            <chr> "Back-to-back Championships. 3 titles in ...
+    $ retweet_created_at      <dttm> 2018-06-13 19:20:53, 2018-06-09 22:19:16...
     $ retweet_source          <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ retweet_favorite_count  <int> NA, 3967, 4078, 3501, NA, 13970, 1689, NA...
-    $ retweet_retweet_count   <int> NA, 1210, 1816, 1393, NA, 8963, 508, NA, ...
-    $ retweet_user_id         <chr> NA, "19923144", "19923144", "19923144", N...
-    $ retweet_screen_name     <chr> NA, "NBA", "NBA", "NBA", NA, "warriors", ...
-    $ retweet_name            <chr> NA, "NBA", "NBA", "NBA", NA, "Golden Stat...
-    $ retweet_followers_count <int> NA, 27819753, 27819758, 27819758, NA, 583...
-    $ retweet_friends_count   <int> NA, 1664, 1664, 1664, NA, 987, 1664, NA, ...
-    $ retweet_statuses_count  <int> NA, 201209, 201209, 201209, NA, 76309, 20...
-    $ retweet_location        <chr> NA, "", "", "", NA, "Oakland, CA", "", NA...
-    $ retweet_description     <chr> NA, "30 teams, 1 goal. #ThisIsWhyWePlay",...
-    $ retweet_verified        <lgl> NA, TRUE, TRUE, TRUE, NA, TRUE, TRUE, NA,...
-    $ place_url               <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ place_name              <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ place_full_name         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ place_type              <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ country                 <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ country_code            <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
+    $ retweet_favorite_count  <int> 1962, 64, 235, 203, NA, 234, NA, 1962, 19...
+    $ retweet_retweet_count   <int> 362, 27, 92, 103, NA, 93, NA, 362, 362, 8...
+    $ retweet_user_id         <chr> "26270913", "1000834131901730817", "26166...
+    $ retweet_screen_name     <chr> "warriors", "culture_strange", "DleeWill"...
+    $ retweet_name            <chr> "Golden State Warriors", "Strange Culture...
+    $ retweet_followers_count <int> 5873378, 38, 106119, 106119, NA, 44478, N...
+    $ retweet_friends_count   <int> 986, 175, 2, 2, NA, 3128, NA, 986, 986, 6...
+    $ retweet_statuses_count  <int> 76517, 8, 1165, 1165, NA, 5290, NA, 76517...
+    $ retweet_location        <chr> "Oakland, CA", "Montréal, Québec", "Bay A...
+    $ retweet_description     <chr> "\U0001f3c6\U0001f3c6\U0001f3c6\U0001f3c6...
+    $ retweet_verified        <lgl> TRUE, FALSE, FALSE, FALSE, NA, FALSE, NA,...
+    $ place_url               <chr> NA, NA, NA, NA, NA, NA, "https://api.twit...
+    $ place_name              <chr> NA, NA, NA, NA, NA, NA, "San Francisco", ...
+    $ place_full_name         <chr> NA, NA, NA, NA, NA, NA, "San Francisco, C...
+    $ place_type              <chr> NA, NA, NA, NA, NA, NA, "city", NA, NA, N...
+    $ country                 <chr> NA, NA, NA, NA, NA, NA, "United States", ...
+    $ country_code            <chr> NA, NA, NA, NA, NA, NA, "US", NA, NA, NA,...
     $ geo_coords              <list> [<NA, NA>, <NA, NA>, <NA, NA>, <NA, NA>,...
     $ coords_coords           <list> [<NA, NA>, <NA, NA>, <NA, NA>, <NA, NA>,...
     $ bbox_coords             <list> [<NA, NA, NA, NA, NA, NA, NA, NA>, <NA, ...
-    $ name                    <chr> "HSN Sports", "Mahmoud Zaytoon", "Wholelo...
-    $ location                <chr> "", "الأسكندرية, مصر", "Fort Myers, FL", ...
-    $ description             <chr> "", "Ahly Barça Liverpool ❤", "Sc\U0001f4...
-    $ url                     <chr> NA, NA, NA, NA, "https://t.co/4NGzgl9FKn"...
+    $ name                    <chr> "Olayinka", "Akhona Gladile", "مُناضل", "...
+    $ location                <chr> "lagos", "East London, South Africa", "",...
+    $ description             <chr> "", "", "", "", "you know, falling in ill...
+    $ url                     <chr> NA, NA, NA, NA, NA, "https://t.co/HFwxSDn...
     $ protected               <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
-    $ followers_count         <int> 10, 27, 8, 8, 22, 1, 4, 313, 313, 20, 20,...
-    $ friends_count           <int> 104, 268, 48, 48, 90, 7, 144, 156, 156, 7...
-    $ listed_count            <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
-    $ statuses_count          <int> 41, 18, 8, 8, 320, 4, 1, 335, 335, 166, 1...
-    $ favourites_count        <int> 0, 138, 0, 0, 328, 3, 5, 98, 98, 163, 163...
-    $ account_created_at      <dttm> 2018-05-25 15:29:56, 2018-05-26 02:45:15...
+    $ followers_count         <int> 795, 12, 0, 0, 79, 12821, 465, 1444, 304,...
+    $ friends_count           <int> 885, 45, 0, 0, 129, 13135, 317, 1089, 394...
+    $ listed_count            <int> 20, 0, 0, 0, 1, 15, 45, 10, 5, 1, 11, 4, ...
+    $ statuses_count          <int> 35347, 16, 18, 23, 238, 11625, 1965, 8989...
+    $ favourites_count        <int> 258, 2, 0, 0, 53, 698, 1645, 870, 5302, 2...
+    $ account_created_at      <dttm> 2012-12-11 12:48:05, 2018-06-09 05:51:02...
     $ verified                <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
-    $ profile_url             <chr> NA, NA, NA, NA, "https://t.co/4NGzgl9FKn"...
-    $ profile_expanded_url    <chr> NA, NA, NA, NA, "http://www.instagram.com...
-    $ account_lang            <chr> "tr", "en", "en", "en", "en", "en", "en",...
-    $ profile_banner_url      <chr> "https://pbs.twimg.com/profile_banners/10...
-    $ profile_background_url  <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ profile_image_url       <chr> "http://pbs.twimg.com/profile_images/1000...
+    $ profile_url             <chr> NA, NA, NA, NA, NA, "https://t.co/HFwxSDn...
+    $ profile_expanded_url    <chr> NA, NA, NA, NA, NA, "https://soundcloud.c...
+    $ account_lang            <chr> "en", "en", "en", "en", "it", "fr", "en",...
+    $ profile_banner_url      <chr> NA, "https://pbs.twimg.com/profile_banner...
+    $ profile_background_url  <chr> "http://abs.twimg.com/images/themes/theme...
+    $ profile_image_url       <chr> "http://pbs.twimg.com/profile_images/9825...
 
-This data set contains `15,004` observations. If I want more tweets, I
-need to adjust the cap on the number of tweets I can collect with my
-API. I can do this by setting the `retryonratelimit` to `TRUE`.
+This data set contains `100` observations. If I want more tweets, I need to adjust the cap on the number of tweets I can collect with my API. I can do this by setting the `retryonratelimit` to `TRUE`.
 
 See below from the manual:
 
-> Logical indicating whether to wait and retry when rate limited. This
-> argument is only relevant if the desired return (`n`) exceeds the
-> remaining limit of available requests (assuming no other searches have
-> been conducted in the past 15 minutes, this limit is 18,000 tweets).
-> Defaults to false. Set to `TRUE` to automate process of conducting big
-> searches (i.e., `n > 18000`). For many search queries, esp. specific
-> or specialized searches, there won’t be more than 18,000 tweets to
-> return. But for broad, generic, or popular topics, the total number of
-> tweets within the `REST` window of time (7-10 days) can easily reach
-> the
-millions.
+> Logical indicating whether to wait and retry when rate limited. This argument is only relevant if the desired return (`n`) exceeds the remaining limit of available requests (assuming no other searches have been conducted in the past 15 minutes, this limit is 18,000 tweets).
+> Defaults to false. Set to `TRUE` to automate process of conducting big searches (i.e., `n > 18000`). For many search queries, esp. specific or specialized searches, there won’t be more than 18,000 tweets to return. But for broad, generic, or popular topics, the total number of tweets within the `REST` window of time (7-10 days) can easily reach the millions.
+
 
 ## Collect data for `#DubNation` and `#StrengthInNumbers` with `rtweet::search_tweets2()`
 
-The `rtweet::search_tweets2()` function works just like the
-`rtweet::search_tweets()`, but also “***returns data from one OR MORE
-search queries.***”
+The `rtweet::search_tweets2()` function works just like the `rtweet::search_tweets()`, but also “***returns data from one OR MORE search queries.***”
 
-I’ll use `rtweet::search_tweets2()` to collect data for two hashtags
-now, `#DubNation` and `#StrengthInNumbers`, but set the `n` to `50000`
-and the `retryonratelimit` argument to
-`TRUE`.
-
-## Collect data for `#DubNation` and `#StrengthInNumbers` with `rtweet::search_tweets2()`
-
-The `rtweet::search_tweets2()` function works just like the
-`rtweet::search_tweets()`, but also “***returns data from one OR MORE
-search queries.***”
-
-I’ll use `rtweet::search_tweets2()` to collect data for two hashtags
-now, `#DubNation` and `#StrengthInNumbers`, but set the `n` to `50000`
-and the `retryonratelimit` argument to `TRUE`.
+I’ll use `rtweet::search_tweets2()` to collect data for two hashtags now, `#DubNation` and `#StrengthInNumbers`, but set the `n` to `100000` and the `retryonratelimit` argument to `TRUE`.
 
 ``` r
 ## search using multilple queries
 DubNtnStrngthNmbrs <- rtweet::search_tweets2(
             c("\"#DubNation\"",
               "#StrengthInNumbers"),
-            n = 50000, retryonratelimit = TRUE)
+            n = 100000, retryonratelimit = TRUE)
 ```
 
-The structure for this data frame is displayed below with
-`dplyr::glimpse()`
+The structure for this data frame is displayed below with `dplyr::glimpse()`.
 
 ``` r
 DubNtnStrngthNmbrs %>% dplyr::glimpse(78)
 ```
 
-    Observations: 56,966
+    Observations: 60,035
     Variables: 88
-    $ user_id                 <chr> "1000031071675744256", "10000310716757442...
-    $ status_id               <chr> "1005524470843441153", "10055250664933744...
-    $ created_at              <dttm> 2018-06-09 18:58:10, 2018-06-09 19:00:32...
-    $ screen_name             <chr> "Gracinha_pxt", "Gracinha_pxt", "Gracinha...
-    $ text                    <chr> "RT @warriors: #DubNation, your 2018 Cham...
-    $ source                  <chr> "Twitter for iPhone", "Twitter for iPhone...
-    $ display_text_width      <dbl> 140, 103, 63, 140, 77, 140, 140, 139, 123...
+    $ user_id                 <chr> "1000017900130861057", "10000595975274209...
+    $ status_id               <chr> "1006490712362237952", "10065656585938247...
+    $ created_at              <dttm> 2018-06-12 10:57:40, 2018-06-12 15:55:28...
+    $ screen_name             <chr> "urqnminJFwPNlPb", "whoismanelabreu", "wh...
+    $ text                    <chr> "RT @vwphotographer: My favourite #bus fr...
+    $ source                  <chr> "Twitter for Android", "Twitter for Andro...
+    $ display_text_width      <dbl> 140, 104, 84, 69, 144, 81, 61, 140, 104, ...
     $ reply_to_status_id      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ reply_to_user_id        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ reply_to_screen_name    <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ is_quote                <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
     $ is_retweet              <lgl> TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE,...
     $ favorite_count          <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
-    $ retweet_count           <int> 1136, 92, 148, 1, 6, 1136, 1136, 1012, 14...
-    $ hashtags                <list> ["DubNation", <"DubNation", "NBAFinals",...
+    $ retweet_count           <int> 9, 1739, 137, 424, 302, 2161, 986, 486, 1...
+    $ hashtags                <list> [<"bus", "VanLife", "Vintage", "Volkswag...
     $ symbols                 <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ urls_url                <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ urls_t.co               <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ urls_expanded_url       <list> [NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
-    $ media_url               <list> [NA, "http://pbs.twimg.com/media/DfOVWIN...
-    $ media_t.co              <list> [NA, "https://t.co/kSbS11eZxy", "https:/...
-    $ media_expanded_url      <list> [NA, "https://twitter.com/GloballyCurry3...
-    $ media_type              <list> [NA, "photo", "photo", NA, "photo", NA, ...
-    $ ext_media_url           <list> [NA, "http://pbs.twimg.com/media/DfOVWIN...
-    $ ext_media_t.co          <list> [NA, "https://t.co/kSbS11eZxy", "https:/...
-    $ ext_media_expanded_url  <list> [NA, "https://twitter.com/GloballyCurry3...
+    $ urls_url                <list> [NA, NA, NA, NA, NA, NA, NA, "warriors.c...
+    $ urls_t.co               <list> [NA, NA, NA, NA, NA, NA, NA, "https://t....
+    $ urls_expanded_url       <list> [NA, NA, NA, NA, NA, NA, NA, "http://war...
+    $ media_url               <list> [NA, "http://pbs.twimg.com/tweet_video_t...
+    $ media_t.co              <list> [NA, "https://t.co/CK2nFEB3KN", "https:/...
+    $ media_expanded_url      <list> [NA, "https://twitter.com/warriors/statu...
+    $ media_type              <list> [NA, "photo", "photo", "photo", NA, "pho...
+    $ ext_media_url           <list> [NA, "http://pbs.twimg.com/tweet_video_t...
+    $ ext_media_t.co          <list> [NA, "https://t.co/CK2nFEB3KN", "https:/...
+    $ ext_media_expanded_url  <list> [NA, "https://twitter.com/warriors/statu...
     $ ext_media_type          <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ mentions_user_id        <list> ["26270913", "735871787875991553", "7358...
-    $ mentions_screen_name    <list> ["warriors", "GloballyCurry30", "Globall...
-    $ lang                    <chr> "en", "en", "und", "pt", "en", "en", "en"...
+    $ mentions_user_id        <list> [<"913370450796871681", "1141181808">, "...
+    $ mentions_screen_name    <list> [<"vwphotographer", "VdubAtThePub">, "wa...
+    $ lang                    <chr> "en", "en", "en", "en", "en", "en", "en",...
     $ quoted_status_id        <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ quoted_text             <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ quoted_created_at       <dttm> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
@@ -261,21 +218,21 @@ DubNtnStrngthNmbrs %>% dplyr::glimpse(78)
     $ quoted_location         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ quoted_description      <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ quoted_verified         <lgl> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ retweet_status_id       <chr> "1005498277033226241", "10053120874077143...
-    $ retweet_text            <chr> "#DubNation, your 2018 Champs \U0001f3c6 ...
-    $ retweet_created_at      <dttm> 2018-06-09 17:14:05, 2018-06-09 04:54:14...
+    $ retweet_status_id       <chr> "1006299027040817152", "10065225244386181...
+    $ retweet_text            <chr> "My favourite #bus from @VdubAtThePub in ...
+    $ retweet_created_at      <dttm> 2018-06-11 22:15:58, 2018-06-12 13:04:04...
     $ retweet_source          <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
-    $ retweet_favorite_count  <int> 5080, 316, 397, 1, 15, 5080, 5080, 4685, ...
-    $ retweet_retweet_count   <int> 1136, 92, 148, 1, 6, 1136, 1136, 1012, 14...
-    $ retweet_user_id         <chr> "26270913", "735871787875991553", "735871...
-    $ retweet_screen_name     <chr> "warriors", "GloballyCurry30", "GloballyC...
-    $ retweet_name            <chr> "Golden State Warriors", "Team Wardell SC...
-    $ retweet_followers_count <int> 5863529, 44051, 44051, 70, 90, 5863529, 5...
-    $ retweet_friends_count   <int> 986, 4933, 4933, 84, 121, 986, 986, 26, 1...
-    $ retweet_statuses_count  <int> 76452, 6888, 6888, 189, 25, 76452, 76452,...
-    $ retweet_location        <chr> "Oakland, CA", "World Wide - Warriors", "...
-    $ retweet_description     <chr> "\U0001f3c6\U0001f3c6\U0001f3c6\U0001f3c6...
-    $ retweet_verified        <lgl> TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, T...
+    $ retweet_favorite_count  <int> 29, 7532, 681, 1150, 2057, 11165, 5248, 2...
+    $ retweet_retweet_count   <int> 9, 1739, 137, 424, 302, 2161, 986, 486, 1...
+    $ retweet_user_id         <chr> "913370450796871681", "26270913", "199231...
+    $ retweet_screen_name     <chr> "vwphotographer", "warriors", "NBA", "war...
+    $ retweet_name            <chr> "vwphotographer", "Golden State Warriors"...
+    $ retweet_followers_count <int> 317, 5871460, 27854711, 5871456, 1864037,...
+    $ retweet_friends_count   <int> 25, 986, 1663, 986, 1599, 1663, 1663, 986...
+    $ retweet_statuses_count  <int> 248, 76490, 201517, 76490, 14020, 201517,...
+    $ retweet_location        <chr> "Poole, England", "Oakland, CA", "", "Oak...
+    $ retweet_description     <chr> "Daily dose of Buses, Bugs & Vans. Pictur...
+    $ retweet_verified        <lgl> FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE...
     $ place_url               <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ place_name              <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
     $ place_full_name         <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, N...
@@ -285,33 +242,53 @@ DubNtnStrngthNmbrs %>% dplyr::glimpse(78)
     $ geo_coords              <list> [<NA, NA>, <NA, NA>, <NA, NA>, <NA, NA>,...
     $ coords_coords           <list> [<NA, NA>, <NA, NA>, <NA, NA>, <NA, NA>,...
     $ bbox_coords             <list> [<NA, NA, NA, NA, NA, NA, NA, NA>, <NA, ...
-    $ name                    <chr> "Karen Peixoto", "Karen Peixoto", "Karen ...
-    $ location                <chr> "Santa Cruz, Rio de Janeiro", "Santa Cruz...
-    $ description             <chr> "Twitter novo, o outro foi bloqueado. Jes...
-    $ url                     <chr> NA, NA, NA, NA, NA, "https://t.co/fbyfQas...
+    $ name                    <chr> "有栖川やい２号", "Manel Abreu", "Manel Abreu", ...
+    $ location                <chr> "", "Manellândia", "Manellândia", "Boston...
+    $ description             <chr> "", "Manenenenenenenellll", "Manenenenene...
+    $ url                     <chr> NA, "https://t.co/4ZfUzV0DpO", "https://t...
     $ protected               <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
-    $ followers_count         <int> 129, 129, 129, 50, 86, 63, 1, 10, 2, 11, ...
-    $ friends_count           <int> 127, 127, 127, 68, 91, 161, 20, 235, 102,...
-    $ listed_count            <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,...
-    $ statuses_count          <int> 340, 340, 340, 128, 191, 1844, 29, 12, 10...
-    $ favourites_count        <int> 1556, 1556, 1556, 60, 55, 744, 9, 6, 13, ...
-    $ account_created_at      <dttm> 2018-05-25 15:09:22, 2018-05-25 15:09:22...
+    $ followers_count         <int> 90, 37, 37, 42, 1, 19, 15, 21, 15, 161, 1...
+    $ friends_count           <int> 251, 39, 39, 122, 9, 135, 166, 72, 114, 1...
+    $ listed_count            <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+    $ statuses_count          <int> 1824, 454, 454, 272, 20, 35, 124, 755, 54...
+    $ favourites_count        <int> 2558, 253, 253, 732, 30, 95, 2216, 2866, ...
+    $ account_created_at      <dttm> 2018-05-25 14:17:01, 2018-05-25 17:02:43...
     $ verified                <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
-    $ profile_url             <chr> NA, NA, NA, NA, NA, "https://t.co/fbyfQas...
-    $ profile_expanded_url    <chr> NA, NA, NA, NA, NA, "http://Instagram.com...
-    $ account_lang            <chr> "en", "en", "en", "pt", "pt", "en", "zh-T...
+    $ profile_url             <chr> NA, "https://t.co/4ZfUzV0DpO", "https://t...
+    $ profile_expanded_url    <chr> NA, "http://curiouscat.me/whoismanelabreu...
+    $ account_lang            <chr> "ja", "pt", "pt", "en", "en", "en", "en",...
     $ profile_banner_url      <chr> "https://pbs.twimg.com/profile_banners/10...
-    $ profile_background_url  <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "...
-    $ profile_image_url       <chr> "http://pbs.twimg.com/profile_images/1005...
+    $ profile_background_url  <chr> NA, NA, NA, NA, NA, NA, NA, NA, "http://a...
+    $ profile_image_url       <chr> "http://pbs.twimg.com/profile_images/1006...
     $ query                   <chr> "\"#DubNation\"", "\"#DubNation\"", "\"#D...
 
-This data frame has `56,966` observations, and adds one additional
-variable. We can use the handy `base::setdiff()` to figure out what
-variables are in `DubNtnStrngthNmbrs` that aren’t in `DubTweetsGame3`.
+Before I export these data, I will create an `outfile` that pastes together four important pieces of information I want with any exported file:
+
+1.  **File Path:** this is the folder destination of the data/object I will be saving
+2.  **Data Object:** the actual name of the data frame/list being saved
+3.  **A timestamp:** a date/time character string (I do this with my custom `timeStamper()` function).
+4.  **A file extension:** this is either .csv, .rds, .RData or however the data object will be saved.
+
+
+
+``` r
+tweet_searches_file_path <- "Data/tweet_searches/"
+DubNtnStrngthNmbrs_outfile <- paste0(tweet_searches_file_path, "DubNtnStrngthNmbrs",
+                                                timeStamper(), ".rds")
+DubNtnStrngthNmbrs_outfile
+```
+
+``` r
+write_rds(x = DubNtnStrngthNmbrs, path = DubNtnStrngthNmbrs_outfile)
+# verify
+# dir(tweet_searches_file_path)
+```
+
+This data frame has `60,035` observations, and adds one additional variable. We can use the handy `base::setdiff()` to figure out what variables are in `DubNtnStrngthNmbrs` that aren’t in `DubTweetsGame3`.
 
 ``` r
 base::setdiff(x = names(DubNtnStrngthNmbrs),
-              y = names(DubTweetsGame3))
+              y = names(DubTweets))
 ```
 
     [1] "query"
@@ -325,21 +302,16 @@ DubNtnStrngthNmbrs %>% count(query)
     # A tibble: 2 x 2
       query                  n
       <chr>              <int>
-    1 "\"#DubNation\""   34349
-    2 #StrengthInNumbers 22617
+    1 "\"#DubNation\""   38112
+    2 #StrengthInNumbers 21923
 
 ### Get user data with `rtweet::users_data()`
 
-The previous data frame had 87 variables in it, which includes the
-variables on users and tweets. We can use the `rtweet::users_data()`
-function to remove the users variables.
+The previous data frame had 87 variables in it, which includes the variables on users and tweets. We can use the `rtweet::users_data()` function to remove the users variables.
 
-The `base::intersect()` function allows us to see what variables from
-`DubNtnStrngthNmbrs` will end up in the results from
-`rtweet::users_data()`.
+The `base::intersect()` function allows us to see what variables from `DubNtnStrngthNmbrs` will end up in the results from `rtweet::users_data()`.
 
-*I added `tibble::as_tibble()` so the variables print nicely to the
-screen.*
+*I added `tibble::as_tibble()` so the variables print nicely to the screen.*
 
 ``` r
 tibble::as_tibble(base::intersect(x = base::names(DubNtnStrngthNmbrs),
@@ -372,8 +344,7 @@ tibble::as_tibble(base::intersect(x = base::names(DubNtnStrngthNmbrs),
 20 profile_image_url
 ```
 
-I’ll store the contents in a new data frame called
-`UsersDubNtnStrngthNmbrs`.
+I’ll store the contents in a new data frame called `UsersDubNtnStrngthNmbrs`.
 
 ``` r
 # get user data
@@ -381,37 +352,34 @@ UsersDubNtnStrngthNmbrs <- rtweet::users_data(DubNtnStrngthNmbrs)
 UsersDubNtnStrngthNmbrs %>% glimpse(78)
 ```
 
-    Observations: 56,966
+    Observations: 60,035
     Variables: 20
-    $ user_id                <chr> "1000031071675744256", "100003107167574425...
-    $ screen_name            <chr> "Gracinha_pxt", "Gracinha_pxt", "Gracinha_...
-    $ name                   <chr> "Karen Peixoto", "Karen Peixoto", "Karen P...
-    $ location               <chr> "Santa Cruz, Rio de Janeiro", "Santa Cruz,...
-    $ description            <chr> "Twitter novo, o outro foi bloqueado. Jesu...
-    $ url                    <chr> NA, NA, NA, NA, NA, "https://t.co/fbyfQas8...
+    $ user_id                <chr> "1000017900130861057", "100005959752742093...
+    $ screen_name            <chr> "urqnminJFwPNlPb", "whoismanelabreu", "who...
+    $ name                   <chr> "有栖川やい２号", "Manel Abreu", "Manel Abreu", "...
+    $ location               <chr> "", "Manellândia", "Manellândia", "Boston,...
+    $ description            <chr> "", "Manenenenenenenellll", "Manenenenenen...
+    $ url                    <chr> NA, "https://t.co/4ZfUzV0DpO", "https://t....
     $ protected              <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, ...
-    $ followers_count        <int> 129, 129, 129, 50, 86, 63, 1, 10, 2, 11, 6...
-    $ friends_count          <int> 127, 127, 127, 68, 91, 161, 20, 235, 102, ...
-    $ listed_count           <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, ...
-    $ statuses_count         <int> 340, 340, 340, 128, 191, 1844, 29, 12, 102...
-    $ favourites_count       <int> 1556, 1556, 1556, 60, 55, 744, 9, 6, 13, 5...
-    $ account_created_at     <dttm> 2018-05-25 15:09:22, 2018-05-25 15:09:22,...
+    $ followers_count        <int> 90, 37, 37, 42, 1, 19, 15, 21, 15, 161, 11...
+    $ friends_count          <int> 251, 39, 39, 122, 9, 135, 166, 72, 114, 17...
+    $ listed_count           <int> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ...
+    $ statuses_count         <int> 1824, 454, 454, 272, 20, 35, 124, 755, 54,...
+    $ favourites_count       <int> 2558, 253, 253, 732, 30, 95, 2216, 2866, 7...
+    $ account_created_at     <dttm> 2018-05-25 14:17:01, 2018-05-25 17:02:43,...
     $ verified               <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, ...
-    $ profile_url            <chr> NA, NA, NA, NA, NA, "https://t.co/fbyfQas8...
-    $ profile_expanded_url   <chr> NA, NA, NA, NA, NA, "http://Instagram.com/...
-    $ account_lang           <chr> "en", "en", "en", "pt", "pt", "en", "zh-TW...
+    $ profile_url            <chr> NA, "https://t.co/4ZfUzV0DpO", "https://t....
+    $ profile_expanded_url   <chr> NA, "http://curiouscat.me/whoismanelabreu"...
+    $ account_lang           <chr> "ja", "pt", "pt", "en", "en", "en", "en", ...
     $ profile_banner_url     <chr> "https://pbs.twimg.com/profile_banners/100...
-    $ profile_background_url <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "h...
-    $ profile_image_url      <chr> "http://pbs.twimg.com/profile_images/10056...
+    $ profile_background_url <chr> NA, NA, NA, NA, NA, NA, NA, NA, "http://ab...
+    $ profile_image_url      <chr> "http://pbs.twimg.com/profile_images/10063...
 
 ## Get tweet data with `rtweet::tweets_data()`
 
-I can also create another data frame with the tweet information using
-the `rtweet::tweets_data()` function. Just like above, I will display
-the variables in this new data frame (but limit it to the top 20).
+I can also create another data frame with the tweet information using the `rtweet::tweets_data()` function. Just like above, I will display the variables in this new data frame (but limit it to the top 20).
 
-I will store these variables in the `TweetsDubNtnStrngthNmbrs` data
-frame.
+I will store these variables in the `TweetsDubNtnStrngthNmbrs` data frame.
 
 ``` r
 tibble::as_tibble(
@@ -452,9 +420,8 @@ TweetsDubNtnStrngthNmbrs <- rtweet::tweets_data(DubNtnStrngthNmbrs)
 
 ### View the tweets in the `text` column
 
-The tweets are stored in the column/variable called `text`. We can
-review the first 10 of these entries with `dplyr::select()` and
-`utils::head()`.
+The tweets are stored in the column/variable called `text`. I can review the first 10 of these entries with `dplyr::select()` and `utils::head()`.
+
 
 ``` r
 DubNtnStrngthNmbrs %>%
@@ -465,27 +432,103 @@ DubNtnStrngthNmbrs %>%
     # A tibble: 10 x 1
        text
        <chr>
-     1 RT @warriors: #DubNation, your 2018 Champs 🏆 will arrive back home thi…
-     2 RT @GloballyCurry30: Greatest. Of. All. Time. #DubNation #NBAFinals #N…
-     3 RT @GloballyCurry30: #DubNation #WEBACK https://t.co/brNLP7JbRh
-     4 RT @indepocrlh: Espero q para o ano ao menos a final seja mais disputa…
-     5 "RT @gbrandaoc11: Another one!💙💛\n#DubNation #NBAFinals https://t.co/J…
-     6 RT @warriors: #DubNation, your 2018 Champs 🏆 will arrive back home thi…
-     7 RT @warriors: #DubNation, your 2018 Champs 🏆 will arrive back home thi…
-     8 RT @TripleH: Three @NBA Championships out of the last four years. Cong…
-     9 "RT @NBA: Coach @SteveKerr and @QCook323 share a moment as NBA champs!…
-    10 RT @KiannaDy: Congrats GSW!!!! 💙💛💙💛 #DubNation https://t.co/Ij6xl5ZZlq…
+     1 RT @vwphotographer: My favourite #bus from @VdubAtThePub in a little p…
+     2 "RT @warriors: 🗣️ IT'S #WARRIORSPARADE DAY!\n\nThe fun begins at 11 am…
+     3 RT @NBA: Klay waves hello at the #WarriorsParade! #DubNation https://t…
+     4 RT @warriors: 2018 NBA CHAMPIONS 🏆 #DubNation https://t.co/SJrGE7nSBQ
+     5 RT @JimmyKimmelLive: Tonight on #Kimmel #NBAFinals #MVP Kevin Durant @…
+     6 "RT @NBA: Championship Klay! \n\n#DubNation\n#ThisIsWhyWePlay https://…
+     7 RT @NBA: Happy Parade Day! #DubNation https://t.co/3qpgbRihkD
+     8 "RT @warriors: Can't wait to celebrate this Championship with #DubNati…
+     9 "RT @warriors: 🗣️ IT'S #WARRIORSPARADE DAY!\n\nThe fun begins at 11 am…
+    10 "RT @warriors: 🗣️ IT'S #WARRIORSPARADE DAY!\n\nThe fun begins at 11 am…
+
+I will export these data frames using the methods described above.
+
+``` r
+# ls()
+TweetsDubNtnStrngthNmbrs_outfile <- paste0(tweet_searches_file_path,
+                                           "TweetsDubNtnStrngthNmbrs",
+                                            timeStamper(), ".rds")
+# TweetsDubNtnStrngthNmbrs_outfile
+write_rds(x = TweetsDubNtnStrngthNmbrs, path = TweetsDubNtnStrngthNmbrs_outfile)
+```
+
+``` r
+# ls()
+UsersDubNtnStrngthNmbrs_outfile <- paste0(tweet_searches_file_path,
+                                           "UsersDubNtnStrngthNmbrs",
+                                            timeStamper(), ".rds")
+# UsersDubNtnStrngthNmbrs_outfile
+write_rds(x = UsersDubNtnStrngthNmbrs, path = UsersDubNtnStrngthNmbrs_outfile)
+# verify
+# fs::dir_ls(tweet_searches_file_path)
+```
+
+## Get streaming tweets with `rtweet::stream_tweets(()`
+
+This function allows me to collect all tweets mentioning the `WarriorsParade` for a specified amount of time. I will start with `90` seconds.
+
+``` r
+WarriorsParadeStream <- rtweet::stream_tweets(q = "WarriorsParade", timeout = 90)
+# WarriorsParadeStream %>% glimpse(78)
+```
+
+The `rtweet` package also comes with a handy function for plotting tweets over time with `rtweet::ts_plot()`.
+
+``` r
+rtweet::ts_plot(data = WarriorsParadeStream, by = "secs")
+```
+
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-ts_plot_WarriorsParadeStream.png)
+
+``` r
+ggplot2::ggsave(filename = "Images/2.5-ts_plot_WarriorsParadeStream.png", width = 6.5,height = 4, units = "in")
+```
+
+Just for comparison, I will also collect another stream of tweets mentioning `Warriors` for `120` seconds.
+
+``` r
+WarriorsStream <- rtweet::stream_tweets(q = "Warriors", timeout = 120)
+# WarriorsStream %>% glimpse(78)
+```
+
+``` r
+rtweet::ts_plot(data = WarriorsStream, by = "secs")
+```
+
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-ts_plot_WarriorsStream.png)
+
+``` r
+ggplot2::ggsave(filename = "Images/2.5-ts_plot_WarriorsStream.png", width = 6.5,height = 4, units = "in")
+```
+
+Now export these data frames so we can archive them.
+
+``` r
+# ls()
+WarriorsParadeStream_outfile <- paste0(tweet_searches_file_path,
+                                           "WarriorsParadeStream",
+                                            timeStamper(), ".rds")
+# WarriorsParadeStream_outfile
+# ls()
+WarriorsStream_outfile <- paste0(tweet_searches_file_path,
+                                           "WarriorsStream",
+                                            timeStamper(), ".rds")
+# WarriorsStream_outfile
+write_rds(x = WarriorsParadeStream, path = WarriorsParadeStream_outfile)
+write_rds(x = WarriorsStream, path = WarriorsStream_outfile)
+# verify
+# fs::dir_ls("Data/tweet_searches") %>% writeLines()
+```
 
 ## The timeline of tweets with `rtweet::ts_plot()`
 
-The `rtweet` package also comes with a handy function for plotting
-tweets over time with `rtweet::ts_plot()`. I added the
-`ggthemes::theme_gdocs()` theme and made the title text bold with
-`ggplot2::theme(plot.title = ggplot2::element_text())`.
+I added the `ggthemes::theme_gdocs()` theme and made the title text bold with `ggplot2::theme(plot.title = ggplot2::element_text())`.
 
 ``` r
 gg_ts_plot <- DubNtnStrngthNmbrs %>%
-    rtweet::ts_plot(., by = "15 minutes") +
+    rtweet::ts_plot(., by = "10 minutes") +
     ggthemes::theme_gdocs() +
     ggplot2::theme(plot.title =
                        ggplot2::element_text(face = "bold")) +
@@ -493,28 +536,24 @@ gg_ts_plot <- DubNtnStrngthNmbrs %>%
             x = NULL,
             y = NULL,
             title = "#DubNation & #StrengthInNumbers tweets",
-            caption = "\nSource: Counts aggregated using fifteen-minute intervals;
+            caption = "\nSource: Counts aggregated using ten-minute intervals;
                         data collected using Twitter's REST API via rtweet")
 gg_ts_plot
 ```
 
-![gg_ts_plot](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_ts_plot.png)
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-gg_ts_plot.png)
 
 ``` r
-ggsave(filename = "Images/gg_ts_plot.png", width = 6.5, height = 4, units = "in")
+ggplot2::ggsave(filename = "Images/2.5-gg_ts_plot.png", width = 6.5,height = 4, units = "in")
 ```
 
-This graph shows an increase in tweets for these hashtags between
-`June 09, 12:00` to `June 09, 18:00`.
+This graph shows an increase in tweets for these hashtags between `June 09, 09:21:44 UTC` to `June 12, 19:39:51 UTC`.
 
 ## Get longitude and lattitude for tweets in `DubTweets`
 
-I can also add some geographic information to the twitter data (i.e. the
-latitude and longitude for each tweet) using the `rtweet::lat_lng()`
-function.
+I can also add some geographic information to the twitter data (i.e. the latitude and longitude for each tweet) using the `rtweet::lat_lng()` function.
 
-This function adds a `lat` and `lng` variable to the
-`DubNtnStrngthNmbrs` data frame.
+This function adds a `lat` and `lng` variable to the `DubNtnStrngthNmbrs` data frame.
 
 *I verify this with `names()` and `tail()`*.
 
@@ -534,25 +573,21 @@ DubNtnStrngthNmbrsLoc %>% names() %>% tail(2)
 
     [1] "lat" "lng"
 
-I will check how many of the tweets have latitude and longitude
-information using `dplyr::distinct()` and `base::nrow()`.
+I will check how many of the tweets have latitude and longitude information using `dplyr::distinct()` and `base::nrow()`.
 
 ``` r
 DubNtnStrngthNmbrsLoc %>% dplyr::distinct(lng) %>% base::nrow()
 ```
 
-    [1] 198
+    [1] 164
 
 ``` r
 DubNtnStrngthNmbrsLoc %>% dplyr::distinct(lat) %>% base::nrow()
 ```
 
-    [1] 198
+    [1] 164
 
-Not every tweet has geographic information associated with it, so we
-will not be graphing all `56,966` observations. I’ll rename `lng` to
-`long` so it will be easier to join to the state-level
-data.
+Not every tweet has geographic information associated with it, so we will not be graphing all 60,000+ observations. I’ll rename `lng` to `long` so it will be easier to join to the state-level data.
 
 ``` r
 DubNtnStrngthNmbrsLoc <- DubNtnStrngthNmbrsLoc %>% dplyr::rename(long = lng)
@@ -560,8 +595,7 @@ DubNtnStrngthNmbrsLoc <- DubNtnStrngthNmbrsLoc %>% dplyr::rename(long = lng)
 
 ## Create World Map of \#DubNation/\#StrengthInNumbers
 
-I will use the `ggplot2::map_data()` function to get the `"world"` data
-I’ll build a map with (save this as `World`).
+I will use the `ggplot2::map_data()` function to get the `"world"` data I’ll build a map with (save this as `World`).
 
 ``` r
 library(maps)
@@ -579,11 +613,7 @@ World %>% glimpse(78)
     $ region    <chr> "Aruba", "Aruba", "Aruba", "Aruba", "Aruba", "Aruba", "...
     $ subregion <chr> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,...
 
-The `ggplot2::geom_polygon()` function will create a map with the
-`World` data. The variables that build the map are `long` and `lat` (you
-can see why I renamed the `lng` variable to `long` in
-`DubNtnStrngthNmbrsLoc`). I added the Warrior team colors with `fill`
-and `color`.
+The `ggplot2::geom_polygon()` function will create a map with the `World` data. The variables that build the map are `long` and `lat` (you can see why I renamed the `lng` variable to `long` in `DubNtnStrngthNmbrsLoc`). I added the Warrior team colors with `fill` and `color`.
 
 ``` r
 ggWorldMap <- ggplot2::ggplot() +
@@ -591,46 +621,36 @@ ggWorldMap <- ggplot2::ggplot() +
                             aes(x = long,
                                 y = lat,
                                 group = group),
-                                fill = "gold",
-                                color = "royalblue",
-                                alpha = 0.6)
+                                fill = "royalblue",
+                                color = "gainsboro",
+                                alpha = 0.5)
 ggWorldMap +
      ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) +
      ggplot2::labs(title = "Basic World Map (geom_polygon)")
 ```
 
-![ggWorldMap](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/ggWorldMap.png)
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-ggWorldMap.png)
 
 ``` r
-ggsave(filename = "Images/ggWorldMap.png",
-       width = 6.5,
-       height = 4,
-       units = "in")
+ggplot2::ggsave(filename = "Images/2.5-ggWorldMap.png", width = 6.5,height = 4, units = "in")
 ```
 
 ## Add the tweet data to the map
 
-Now that I have a basic projection of the world, I can layer the twitter
-data onto the map with `ggplot2::geom_point()` by specifying the `long`
-and `lat` to `x` and `y`. The `data` argument also needs to be specified
-because we will be introducing a second data set (and will not be using
-the `World` data).
+Now that I have a basic projection of the world, I can layer the twitter data onto the map with `ggplot2::geom_point()` by specifying the `long` and `lat` to `x` and `y`. The `data` argument also needs to be specified because we will be introducing a second data set (and will not be using the `World` data).
 
-This is what’s referred to as the `mercator` projection. It is the
-default setting in `coord_quickmap()`. I also add the
-`ggthemes::theme_map()` for a cleaner print of the map (without ticks
-and
-axes)
+This is what’s referred to as the `mercator` projection. It is the default setting in `coord_quickmap()`. I also add the `ggthemes::theme_map()` for a cleaner print of the map (without ticks and axes)
 
 ``` r
 gg_Merc_title <- "  Worldwide (Mercator) #DubNation and #StrengthInNumbers tweets"
-gg_Merc_cap <- "tweets collected with rtweet the hashtags #DubNation and #StrengthInNumbers"
+gg_Merc_cap <- "tweets collected with rtweet; \nhashtags #DubNation and #StrengthInNumbers"
 gg_mercator_dubstrngth <- ggWorldMap +
     ggplot2::coord_quickmap() +
         ggplot2::geom_point(data = DubNtnStrngthNmbrsLoc,
                         aes(x = long, y = lat),
-                        size = 0.7, # reduce size of points
-                        color = "firebrick") +
+                        size = 0.9, # reduce size of points
+                        fill = "gainsboro",
+                        color = "orangered1") +
     # add titles/labels
      ggplot2::theme(plot.title = ggplot2::element_text(face = "bold")) +
         ggplot2::labs(title = gg_Merc_title,
@@ -639,34 +659,20 @@ gg_mercator_dubstrngth <- ggWorldMap +
 gg_mercator_dubstrngth
 ```
 
-![gg_mercator_dubstrngth](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_mercator_dubstrngth.png)
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-gg_mercator_dubstrngth.png)
 
 ``` r
-ggplot2::ggsave(filename = "Images/gg_mercator_dubstrngth.png",
-                width = 6.5,
-                height = 4,
-                units = "in")
+ggplot2::ggsave(filename = "Images/2.5-gg_mercator_dubstrngth.png", width = 6.5,height = 4, units = "in")
 ```
 
-The Mercator projection works well for navigation because the meridians
-are equally spaced (the grid lines that runs north and south), but the
-parallels (the lines that run east/west around) are not equally spaced.
-This causes a distortion in the land masses at both poles. The map above
-makes it look like Greenland is roughly 1/2 or 2/3 the size of Africa,
-when in reality Africa is 14x larger.
+The Mercator projection works well for navigation because the meridians are equally spaced (the grid lines that runs north and south), but the parallels (the lines that run east/west around) are not equally spaced. This causes a distortion in the land masses at both poles. The map above makes it look like Greenland is roughly 1/2 or 2/3 the size of Africa, when in reality Africa is 14x larger.
 
 ## Mapping with the Winkel tripel projection
 
-An alternative to the Mercator projection is the [Winkel
-tripel](https://en.wikipedia.org/wiki/Winkel_tripel_projection)
-projection. This map attempts to correct the distortions in the Mercator
-map.
+An alternative to the Mercator projection is the [Winkel tripel](https://en.wikipedia.org/wiki/Winkel_tripel_projection) projection. This map attempts to correct the distortions in the Mercator map.
 
-This map gets added via the `ggalt::coord_proj()` function, which takes
-a projection argument from the `proj4`
-[package.](https://cran.r-project.org/web/packages/proj4/index.html) I
-add the Winkel tripel layer with `ggplot2::coord_proj("+proj=wintri")`
-below.
+This map gets added via the `ggalt::coord_proj()` function, which takes a projection argument from the `proj4` [package.](https://cran.r-project.org/web/packages/proj4/index.html) I add the Winkel tripel layer with `ggplot2::coord_proj("+proj=wintri")` below.
+
 
 ``` r
 # convert query to factor (you'll see why later)
@@ -674,7 +680,7 @@ DubNtnStrngthNmbrsLoc$query <- factor(DubNtnStrngthNmbrsLoc$query,
                           labels = c("#DubNation", "#StrengthInNumbers"))
 # define titles
 ggDubWT_title <- "Worldwide (Winkel tripel) #DubNation &\n#StrengthInNumbers tweets"
-ggDubWT_cap <- "tweets collected with rtweet the hashtags #DubNation and #StrengthInNumbers  "
+ggDubWT_cap <- "tweets collected with rtweet package; \nhashtags #DubNation and #StrengthInNumbers  "
 
 #  create world map
 ggWorld2 <- ggplot2::ggplot() +
@@ -683,15 +689,15 @@ ggWorld2 <- ggplot2::ggplot() +
                         y = lat,
                         map_id = region),
                     size = 0.009,
-                    fill = "gold",
-                    alpha = 0.4)
+                    fill = "royalblue",
+                    alpha = 0.6)
         #  add the twiiter data layer
 ggDubWinkelTrip <- ggWorld2 +
     ggplot2::geom_point(data = DubNtnStrngthNmbrsLoc,
             aes(x = long,
                 y = lat),
-                    color = "royalblue",
-                    size = 0.4) +
+                    color = "orangered1",
+                    size = 0.9) +
         # add Winkel tripel layer
         ggalt::coord_proj("+proj=wintri") +
             ggplot2::theme(plot.title = ggplot2::element_text(
@@ -702,26 +708,21 @@ ggDubWinkelTrip <- ggWorld2 +
 ggDubWinkelTrip
 ```
 
-![ggDubWinkelTrip](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/ggDubWinkelTrip.png)
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-ggDubWinkelTrip.png)
 
 ``` r
-ggsave(filename = "Images/ggDubWinkelTrip.png", width = 6.5, height = 4, units = "in")
+ggplot2::ggsave(filename = "Images/2.5-ggDubWinkelTrip.png", width = 6.5,height = 4, units = "in")
 ```
 
-This map is an ok start, but I want to add some additional
-customization:
+This map is an ok start, but I want to add some additional customization:
 
-  - I’ll start by adjusting the x axis manually with
-    `ggplot2::scale_x_continuous()` (this gives a full ‘globe’ on the
+  - I’ll start by adjusting the x axis manually with `ggplot2::scale_x_continuous()` (this gives a full ‘globe’ on the
     map),
-  - I add the FiveThiryEight theme from
-    `ggthemes::theme_fivethirtyeight()`,
-  - Remove the `x` and `y` axis labels with two `ggplot2::theme()`
-    statements,
-  - Finally, facet these maps by the query type (`#DubNation` or
-    `#StrengthInNumbers`)
+  - I add the FiveThiryEight theme from `ggthemes::theme_fivethirtyeight()`,
+  - Remove the `x` and `y` axis labels with two `ggplot2::theme()` statements,
+  - Finally, facet these maps by the query type (`#DubNation` or `#StrengthInNumbers`)
 
-<!-- end list -->
+
 
 ``` r
 ggDubWinkelTripFacet <- ggDubWinkelTrip +
@@ -741,39 +742,21 @@ ggDubWinkelTripFacet <- ggDubWinkelTrip +
 ggDubWinkelTripFacet
 ```
 
-![ggDubWinkelTripFacet](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/ggDubWinkelTripFacet.png)
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-ggDubWinkelTripFacet.png)
 
 ``` r
-ggsave(filename = "Images/ggDubWinkelTripFacet.png",
-       width = 6.5,
-       height = 4,
-       units = "in")
+ggplot2::ggsave(filename = "Images/2.5-ggDubWinkelTripFacet.png", width = 6.5,height = 4, units = "in")
 ```
 
-To learn more about maps check out [this
-document](https://pubs.usgs.gov/pp/1453/report.pdf) put out by the U.S.
-Geological Survey on map projections. The description provided in the
-show [West Wing](https://www.youtube.com/watch?v=vVX-PrBRtTY) covers
-some of the distortions in the Mercator map, and this video from
-[Vox](https://www.youtube.com/watch?v=kIID5FDi2JQ) does a great job
-illustrating the difficulties in rendering a sphere or globe on a 2-d
-surface.
+To learn more about maps check out [this document](https://pubs.usgs.gov/pp/1453/report.pdf) put out by the U.S. Geological Survey on map projections. The description provided in the show [West Wing](https://www.youtube.com/watch?v=vVX-PrBRtTY) covers some of the distortions in the Mercator map, and this video from [Vox](https://www.youtube.com/watch?v=kIID5FDi2JQ) does a great job illustrating the difficulties in rendering a sphere or globe on a 2-d surface.
 
 ## Animate the timeline of tweets with `gganiamte`
 
-`rtweet` can collect twitter data over a period of 7-10 days, but the
-data I have in `DubNtnStrngthNmbrsLoc` only ranges from
-`"2018-06-09 07:40:22 UTC"` until `"2018-06-10 02:36:31 UTC"`.
+`rtweet` can collect twitter data over a period of 7-10 days, but the data I have in `DubNtnStrngthNmbrsLoc` only ranges from `"2018-06-09 07:40:22 UTC"` until `"2018-06-10 02:36:31 UTC"`.
 
-I want to see the spread of the `#DubNation` and `#StrengthInNumbers`
-tweets across the globe, but I want to use the point `size` in this this
-animated map to indicate the number of followers associated with each
-tweet. `gganimate` is the ideal package for this because it works well
-with `ggplot2`.
+I want to see the spread of the `#DubNation` and `#StrengthInNumbers` tweets across the globe, but I want to use the point `size` in this this animated map to indicate the number of followers associated with each tweet. `gganimate` is the ideal package for this because it works well with `ggplot2`.
 
-I can start by looking at the number of followers for each account
-(`followers_count`) on the observations with location information
-(`long` and `lat`).
+I can start by looking at the number of followers each twitter account had (`followers_count`) and the observations with location information (`long` and `lat`).
 
 ``` r
 DubNtnStrngthNmbrsLoc %>%
@@ -783,30 +766,27 @@ DubNtnStrngthNmbrsLoc %>%
     # get the sorted count
     dplyr::select(followers_count, screen_name) %>%
     # arrange these descending
-    dplyr::arrange(desc(followers_count)) %>% head(10)
+    dplyr::arrange(desc(followers_count))
 ```
 
-```
-# A tibble: 10 x 2
-   followers_count screen_name
-             <int> <chr>
- 1          424668 realfredrosser
- 2          424666 realfredrosser
- 3           30297 jgibbard
- 4           30297 jgibbard
- 5           18962 Lakeshore23
- 6           16800 coreydu
- 7           12333 billsowah1
- 8           10404 tigerbeat
- 9            8260 jeanquan
-10            8260 jeanquan
-```
+    # A tibble: 605 x 2
+       followers_count screen_name
+                 <int> <chr>
+     1        27854760 NBA
+     2        27854705 NBA
+     3          992680 united
+     4          992679 united
+     5          424626 realfredrosser
+     6          424626 realfredrosser
+     7          234350 mercnews
+     8          234349 mercnews
+     9          143512 LetsGoWarriors
+    10          143510 LetsGoWarriors
+    # ... with 595 more rows
 
-This looks like there are a few `screen_name`s with \> 10000 followers.
-I can get a quick view of the distribution of this variable with
-`qplot()`
+This looks like there are a few `screen_name`s with \> 100,000 followers. I can get a quick view of the distribution of this variable with `qplot()`
 
-```r
+``` r
 gg_freqploy_title <- "Frequency of followers_count for #DubNation &\n#StrengthInNumbers tweets"
 DubNtnStrngthNmbrsLoc %>%
         # identify observations with complete location information
@@ -823,20 +803,15 @@ DubNtnStrngthNmbrsLoc %>%
 ```
 
 
-![gg_freqpolyv1](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_freqpolyv1.1.png)
+
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-gg_freqpolyv1.1.png)<!-- -->
 
 ``` r
-ggsave(filename = "Images/gg_freqpolyv1.2.png",
-       width = 6.5,
-       height = 4,
-       units = "in")
+ggplot2::ggsave(filename = "Images/2.5-gg_freqpolyv1.1.png", width = 6.5,height = 4, units = "in")
 ```
 
-    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-This long tail tells me that these outliers are skewing the
-distribution. I want to see what the distribution looks like without
-these extremely high counts of followers.
+This long tail tells me that these outliers are skewing the distribution. I want to see what the distribution looks like without these extremely high counts of retweets
 
 ``` r
 DubNtnStrngthNmbrsLoc %>%
@@ -845,8 +820,8 @@ DubNtnStrngthNmbrsLoc %>%
                   !is.na(lat)) %>%
     # arrange data
     dplyr::arrange(desc(followers_count)) %>%
-    # remove followers with more than 10,000 followers
-    dplyr::filter(followers_count < 10000) %>%
+    # remove the follower_count that are above 100000
+    dplyr::filter(followers_count < 100000) %>%
         ggplot2::qplot(followers_count,
                        data = .,
                        geom = "freqpoly") +
@@ -857,16 +832,17 @@ DubNtnStrngthNmbrsLoc %>%
             caption = ggDubWT_cap)
 ```
 
-![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_freqpolyv1.2.png)<!-- -->
+
+
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-gg_freqpolyv1.2.png)
 
 ``` r
-ggsave(filename = "Images/gg_freqpolyv1.2.png", width = 6.5, height = 4, units = "in")
+ggplot2::ggsave(filename = "Images/2.5-gg_freqpolyv1.2.png", width = 6.5,height = 4, units = "in")
 ```
 
-This still looks skewed, but now we can see more of a distribution of
-followers. The majority of the observations fall under 2500 followers,
-with a few reaching above 7500. I will remove the observations with more
-than 10,000 followers.
+    `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+This still looks skewed, but now we can see more of a distribution of followers. The majority of the observations fall under 10 followers, with few reaching above 20, so I will remove the observations with more than 100 followers.
 
 ``` r
 DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
@@ -874,16 +850,15 @@ DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
     dplyr::filter(!is.na(long) |
                   !is.na(lat)) %>%
     # arrange data descending
-    dplyr::arrange(desc(followers_count)) %>%
-    # remove the follower_count that are above 10,000
-    dplyr::filter(followers_count < 10000) %>%
+    dplyr::arrange(desc(retweet_count)) %>%
+    # remove the follower_count that are above 100000
+    dplyr::filter(retweet_count < 100000) %>%
     # select only the variables we will be visualizing
     dplyr::select(user_id,
                   status_id,
                   screen_name,
                   followers_count,
-                  friends_count,
-                  favourites_count,
+                  retweet_count,
                   created_at,
                   text,
                   long,
@@ -892,29 +867,22 @@ DubAnimateData <- DubNtnStrngthNmbrsLoc %>%
 DubAnimateData %>% glimpse(78)
 ```
 
-    Observations: 469
-    Variables: 11
-    $ user_id          <chr> "115334561", "115334561", "115334561", "12583976...
-    $ status_id        <chr> "1005481675470471171", "1005481675470471171", "1...
-    $ screen_name      <chr> "jeanquan", "jeanquan", "jeanquan", "JackieKPIX"...
-    $ followers_count  <int> 8260, 8260, 8260, 7230, 7230, 7229, 7229, 7229, ...
-    $ friends_count    <int> 1829, 1829, 1829, 348, 348, 348, 348, 348, 1960,...
-    $ favourites_count <int> 366, 366, 366, 2358, 2358, 2358, 2358, 2358, 493...
-    $ created_at       <dttm> 2018-06-09 16:08:07, 2018-06-09 16:08:07, 2018-...
-    $ text             <chr> "#Sweep!  Pure #joy and #love for the #dubnation...
-    $ long             <dbl> -122.23, -122.23, -122.23, -122.23, -122.23, -12...
-    $ hashtags         <list> [<"Sweep", "joy", "love", "dubnation", "back2ba...
-    $ lat              <dbl> 37.792, 37.792, 37.792, 37.792, 37.792, 37.792, ...
+    Observations: 605
+    Variables: 10
+    $ user_id         <chr> "19923144", "19923144", "63814087", "821198788559...
+    $ status_id       <chr> "1006550485501792258", "1006550485501792258", "10...
+    $ screen_name     <chr> "NBA", "NBA", "liliankim7", "stephenzinho", "Lets...
+    $ followers_count <int> 27854760, 27854705, 4372, 1388, 143510, 143512, 4...
+    $ retweet_count   <int> 999, 981, 51, 35, 30, 30, 17, 17, 11, 11, 10, 10,...
+    $ created_at      <dttm> 2018-06-12 14:55:11, 2018-06-12 14:55:11, 2018-0...
+    $ text            <chr> "Happy Parade Day! #DubNation https://t.co/3qpgbR...
+    $ long            <dbl> -122.23, -122.23, -122.23, -43.30, -122.44, -122....
+    $ hashtags        <list> ["DubNation", "DubNation", <"WarriorsParade", "D...
+    $ lat             <dbl> 37.79, 37.79, 37.79, -22.64, 37.62, 37.62, 34.09,...
 
-Great\! Now I will create another static Winkel tripel map before
-animating it get an idea for what it will look like. I start with the
-`ggWorld2` base from above, then layer in the twitter data, this time
-specifying `size = followers_count` and
-`ggplot2::scale_size_continuous()`. The `range` is the number of
-different points, and the `breaks` are the cut-offs for each size.
+Great\! Now I will create another static Winkel tripel map before animating it get an idea for what it will look like. I start with the `ggWorld2` base from above, then layer in the twitter data, this time specifying `size = followers_count` and `ggplot2::scale_size_continuous()`. The `range` is the number of different points, and the `breaks` are the cut-offs for each size.
 
-I also remove the `x` and `y` axis labels, and add the
-`ggthemes::theme_hc()` for a crisp looking finish.
+I also remove the `x` and `y` axis labels, and add the `ggthemes::theme_hc()` for a crisp looking finish.
 
 ``` r
 ggWorld2 +
@@ -922,11 +890,11 @@ ggWorld2 +
                  y = lat,
                  size = followers_count),
              data = DubAnimateData,
-             color = "royalblue", alpha = .2) +
+             color = "magenta2", alpha = 0.4) +
   ggplot2::scale_size_continuous(range = c(1, 6),
-                                breaks = c(500, 1000, 2000,
-                                           4000, 6000, 8000)) +
-  labs(size = "Followers") +
+                                breaks = c(1, 10, 20,
+                                           30, 40, 50)) +
+  labs(size = "Retweets") +
     ggalt::coord_proj("+proj=wintri") +
     ggthemes::theme_hc() +
     ggplot2::theme(
@@ -943,26 +911,22 @@ ggWorld2 +
                   subtitle = "tweets and followers")
 ```
 
-![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/gg_themehc_v1.0.png)<!-- -->
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/2.5-gg_themehc_v1.0.png)
 
 ``` r
-ggsave(filename = "Images/gg_themehc_v1.0.png", width = 6.5, height = 4, units = "in")
+ggplot2::ggsave(filename = "Images/2.5-gg_themehc_v1.0.png", width = 6.5, height = 4, units = "in")
 ```
 
-I learned a helpful tip from Daniela Vasquez over at
-[d4tagirl](https://d4tagirl.com/2017/05/how-to-plot-animated-maps-with-gganimate)
-to build two data frames to use for displaying the animation before and
-after the points start appearing. These are best built using dates just
-outside the range of the `created_at` field.
+I learned a helpful tip from Daniela Vasquez over at [d4tagirl](https://d4tagirl.com/2017/05/how-to-plot-animated-maps-with-gganimate) to build two data frames to use for displaying the animation before and after the points start appearing. These are best built using dates just outside the range of the `created_at` field.
 
 ``` r
 library(tibble)
 library(lubridate)
-# min(DubAnimateData$created_at) # "2018-06-09 07:43:46 UTC"
-# max(DubAnimateData$created_at) # "2018-06-10 02:36:31 UTC"
+# min(DubAnimateData$created_at) # "2018-06-09 09:22:21 UTC"
+# max(DubAnimateData$created_at) # "2018-06-12 19:37:27 UTC"
 # create data frame foe the beginning of the animation
 EmptyAnimateDataBegin <- tibble(
-        created_at = as_datetime("2018-06-09 07:43:46 UTC"),
+        created_at = as_datetime("2018-06-09 09:21:21 UTC"),
         followers_count = 0,
         long = 0,
         lat = 0)
@@ -972,41 +936,38 @@ EmptyAnimateDataBegin
     # A tibble: 1 x 4
       created_at          followers_count  long   lat
       <dttm>                        <dbl> <dbl> <dbl>
-    1 2018-06-09 07:43:46               0     0     0
+    1 2018-06-09 09:21:21               0     0     0
 
 ``` r
 # create data frame for the end of the animation
 EmptyAnimateDataEnd <- tibble(
-  created_at = seq(as_datetime("2018-06-10 03:00:00 UTC"),
-                   as_datetime("2018-06-10 04:00:00 UTC"),
+  created_at = seq(as_datetime("2018-06-12 19:50:00 UTC"),
+                   as_datetime("2018-06-12 21:00:00 UTC"),
                    by = "min"),
-                followers = 0,
+                followers_count = 0,
                 long = 0,
                 lat = 0)
 EmptyAnimateDataEnd
 ```
 
-    # A tibble: 61 x 4
-       created_at          followers  long   lat
-       <dttm>                  <dbl> <dbl> <dbl>
-     1 2018-06-10 03:00:00         0     0     0
-     2 2018-06-10 03:01:00         0     0     0
-     3 2018-06-10 03:02:00         0     0     0
-     4 2018-06-10 03:03:00         0     0     0
-     5 2018-06-10 03:04:00         0     0     0
-     6 2018-06-10 03:05:00         0     0     0
-     7 2018-06-10 03:06:00         0     0     0
-     8 2018-06-10 03:07:00         0     0     0
-     9 2018-06-10 03:08:00         0     0     0
-    10 2018-06-10 03:09:00         0     0     0
-    # ... with 51 more rows
+    # A tibble: 71 x 4
+       created_at          followers_count  long   lat
+       <dttm>                        <dbl> <dbl> <dbl>
+     1 2018-06-12 19:50:00               0     0     0
+     2 2018-06-12 19:51:00               0     0     0
+     3 2018-06-12 19:52:00               0     0     0
+     4 2018-06-12 19:53:00               0     0     0
+     5 2018-06-12 19:54:00               0     0     0
+     6 2018-06-12 19:55:00               0     0     0
+     7 2018-06-12 19:56:00               0     0     0
+     8 2018-06-12 19:57:00               0     0     0
+     9 2018-06-12 19:58:00               0     0     0
+    10 2018-06-12 19:59:00               0     0     0
+    # ... with 61 more rows
 
-Now I can use these two data frames to add additional layers to the
-animation. `gganimate` takes a `frame` argument, which is the value we
-want the `followers_count` to change over time (`created_at`).
+Now I can use these two data frames to add additional layers to the animation. `gganimate` takes a `frame` argument, which is the value we want the `followers_count` to change over time (`created_at`).
 
-The `cumulative = TRUE` tells R to leave the point on the map after its
-been plotted.
+The `cumulative = TRUE` tells R to leave the point on the map after its been plotted.
 
 ``` r
 DubMap <- ggWorld2 +
@@ -1016,27 +977,28 @@ DubMap <- ggWorld2 +
                  frame = created_at,
                  cumulative = TRUE),
              data = DubAnimateData,
-             color = "royalblue",
-             alpha = .2) +
+             color = "magenta2",
+             alpha = 0.3) +
     # transparent frame 1
   geom_point(aes(x = long,
                 y = lat,
-                size = followers,
+                size = followers_count,
                 frame = created_at,
                 cumulative = TRUE),
-                        data = ghost_points_ini,
+                        data = EmptyAnimateDataBegin,
                         alpha = 0) +
     # transparent frame 2
   geom_point(aes(x = long,
                 y = lat,
-                size = followers,
+                size = followers_count,
                 frame = created_at,
                 cumulative = TRUE),
-                        data = ghost_points_fin,
+                        data = EmptyAnimateDataEnd,
                         alpha = 0) +
-  scale_size_continuous(range = c(1, 6),
-                        breaks = c(500, 1000, 2000, 4000, 6000, 8000)) +
-  labs(size = 'Followers') +
+  ggplot2::scale_size_continuous(range = c(1, 6),
+                                breaks = c(1, 10, 20,
+                                           30, 40, 50)) +
+  labs(size = 'Retweets') +
     ggalt::coord_proj("+proj=wintri") +
     ggthemes::theme_hc() +
     ggplot2::theme(
@@ -1050,40 +1012,67 @@ DubMap <- ggWorld2 +
     ggplot2::labs(title = "#DubNation & #StrengthInNumbers",
                   subtitle = "tweets and followers")
 library(gganimate)
-gganimate(DubMap, interval = .2, "DubMap.gif")
+gganimate(DubMap, interval = .2, "DubMapv2.0.gif")
 ```
 
-![DubMap](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/DubMap.gif)
+![](https://raw.githubusercontent.com/mjfrigaard/dubnation_twitter_data/master/Images/DubMapv2.0.gif)
 
-Now I have an animation that displays the tweets as they appeared in the
-two days following the NBA finals.
+Now I have an animation that displays the tweets as they appeared in the two days following the NBA finals.
 
 ## Export the data
 
-`rtweet` has a handy export function for these twitter data frames as
-.csv files.
+`rtweet` has a handy export function for these twitter data frames as .csv files.
 
 ``` r
-rtweet::write_as_csv(x = DubNtnStrngthNmbrsLoc,
-                 file_name = "Data/Processed/DubNtnStrngthNmbrsLoc.csv")
-
-rtweet::write_as_csv(x = DubNtnStrngthNmbrs,
-                 file_name = "Data/Processed/DubNtnStrngthNmbrs.csv")
-
-rtweet::write_as_csv(x = DubTweetsGame3,
-                 file_name = "Data/Processed/DubTweetsGame3.csv")
-
+# ls()
+processed_data_file_path <- "Data/processed_data/"
+# DubAnimateData
+DubAnimateData_outfile <- paste0(processed_data_file_path, "DubAnimateData",
+                                                timeStamper(), ".csv")
+# export
 rtweet::write_as_csv(x = DubAnimateData,
-                 file_name = "Data/Processed/DubAnimateData.csv")
+                 file_name = DubAnimateData_outfile)
 
-rtweet::write_as_csv(x = TweetsDubNtnStrngthNmbrs,
-                 file_name = "Data/Processed/TweetsDubNtnStrngthNmbrs.csv")
+# DubNtnStrngthNmbrs
+DubNtnStrngthNmbrs_outfile <- paste0(processed_data_file_path, "DubNtnStrngthNmbrs",
+                                                timeStamper(), ".csv")
+# export
+rtweet::write_as_csv(x = DubNtnStrngthNmbrs,
+                 file_name = DubNtnStrngthNmbrs_outfile)
 
+# DubNtnStrngthNmbrsLoc
+DubNtnStrngthNmbrsLoc_outfile <- paste0(processed_data_file_path, "DubNtnStrngthNmbrsLoc",
+                                                timeStamper(), ".csv")
+# export
+rtweet::write_as_csv(x = DubNtnStrngthNmbrsLoc,
+                 file_name = DubNtnStrngthNmbrsLoc_outfile)
+
+# UsersDubNtnStrngthNmbrs
+UsersDubNtnStrngthNmbrs_outfile <- paste0(processed_data_file_path, "UsersDubNtnStrngthNmbrs",
+                                                timeStamper(), ".csv")
+# export
 rtweet::write_as_csv(x = UsersDubNtnStrngthNmbrs,
-                 file_name = "Data/Processed/UsersDubNtnStrngthNmbrs.csv")
+                 file_name = UsersDubNtnStrngthNmbrs_outfile)
+
+# TweetsDubNtnStrngthNmbrs
+TweetsDubNtnStrngthNmbrs_outfile <- paste0(processed_data_file_path, "TweetsDubNtnStrngthNmbrs",
+                                                timeStamper(), ".csv")
+# export
+rtweet::write_as_csv(x = TweetsDubNtnStrngthNmbrs,
+                 file_name = TweetsDubNtnStrngthNmbrs_outfile)
+# WarriorsParadeStream
+WarriorsParadeStream_outfile <- paste0(processed_data_file_path, "WarriorsParadeStream",
+                                                timeStamper(), ".csv")
+# export
+rtweet::write_as_csv(x = WarriorsParadeStream,
+                 file_name = WarriorsParadeStream_outfile)
+# WarriorsStream
+WarriorsStream_outfile <- paste0(processed_data_file_path, "WarriorsStream",
+                                                timeStamper(), ".csv")
+# export
+rtweet::write_as_csv(x = WarriorsStream,
+                 file_name = WarriorsStream_outfile)
 ```
-
-
 
 To learn more check out these awesome resources:
 
